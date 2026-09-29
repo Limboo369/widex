@@ -248,19 +248,16 @@ export class PhoneView {
     }
 
     updateStats() {
+        // one fixed-width slot per value: the top bar does not move when the numbers change
         const s = this.app.stats || {};
-        const parts = [];
-        parts.push('<b>' + this.player.getFps() + '</b> FPS');
-        if (s.videoKbps !== undefined) {
-            parts.push('<b>' + formatBitrate(s.videoKbps) + '</b>');
-        }
-        if (this.player.width) {
-            parts.push(this.player.width + '×' + this.player.height);
-        }
-        if (this.app.ping !== null && this.app.ping !== undefined) {
-            parts.push('ping <b>' + this.app.ping + '</b> ms');
-        }
-        this.statsEl.innerHTML = parts.join(' · ');
+        const ping = this.app.ping;
+        const parts = [
+            ['fps', '<b>' + this.player.getFps() + '</b> FPS'],
+            ['rate', s.videoKbps !== undefined ? '<b>' + formatBitrate(s.videoKbps) + '</b>' : ''],
+            ['size', this.player.width ? this.player.width + '×' + this.player.height : ''],
+            ['ping', ping !== null && ping !== undefined ? 'ping <b>' + ping + '</b> ms' : ''],
+        ];
+        this.statsEl.innerHTML = parts.map(([name, html]) => '<span class="stat-' + name + '">' + html + '</span>').join('');
     }
 
     updateButtons() {
