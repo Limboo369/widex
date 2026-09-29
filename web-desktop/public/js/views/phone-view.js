@@ -118,8 +118,10 @@ export class PhoneView {
         this.messageEl = h('div.stage-message', this.messageSpinner, this.messageTitle, this.messageText, this.messageActions);
         this.stage = h('div.phone-stage', { tabindex: '0' }, this.canvas, this.layer, this.hud, this.messageEl);
         // the toolbar lives in the desktop top bar, so the window is only the phone screen;
-        // in fullscreen it comes back into the view (revealed at the top edge)
+        // in fullscreen the whole top bar moves into the view (revealed at the top edge), so it looks the same
         this.toolbarSlot = document.getElementById('topbar-tools');
+        this.topbar = this.toolbarSlot ? this.toolbarSlot.closest('.desktop-topbar') : null;
+        this.topbarHome = this.topbar ? this.topbar.parentNode : null;
         this.element = h('div.phone-view', this.stage);
         this.placeToolbar();
 
@@ -129,8 +131,13 @@ export class PhoneView {
     }
 
     placeToolbar() {
-        if (this.toolbarSlot && document.fullscreenElement !== this.element) {
+        if (this.topbar) {
             this.toolbarSlot.appendChild(this.toolbar);
+            if (document.fullscreenElement === this.element) {
+                this.element.prepend(this.topbar);
+            } else if (this.topbar.parentNode !== this.topbarHome) {
+                this.topbarHome.prepend(this.topbar);
+            }
         } else {
             this.element.prepend(this.toolbar);
         }
@@ -554,8 +561,8 @@ export class PhoneView {
                 return;
             }
             if (document.fullscreenElement === this.element) {
-                const reveal = e.clientY < 12 || e.target.closest('.phone-toolbar');
-                this.toolbar.classList.toggle('reveal', !!reveal);
+                const reveal = e.clientY < 12;
+                (this.topbar || this.toolbar).classList.toggle('reveal', reveal);
             }
             if (this.mouseDown) {
                 const p = this.toVideo(e);
@@ -627,7 +634,7 @@ export class PhoneView {
         document.addEventListener('fullscreenchange', () => {
             const fullscreen = document.fullscreenElement === this.element;
             this.btnFullscreen.classList.toggle('active', fullscreen);
-            this.toolbar.classList.remove('reveal');
+            (this.topbar || this.toolbar).classList.remove('reveal');
             this.placeToolbar();
             if (!fullscreen && navigator.keyboard && navigator.keyboard.unlock) {
                 navigator.keyboard.unlock();
