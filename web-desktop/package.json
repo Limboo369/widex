@@ -10,7 +10,8 @@
     "test": "node --experimental-vm-modules --test tests/*.test.cjs",
     "app": "electron .",
     "build-server": "node ../android-server/build.js",
-    "package-win": "node scripts/package-win.js"
+    "package-win": "node scripts/package-win.js",
+    "installer": "node scripts/build-installer.js"
   },
   "keywords": [
     "android",
@@ -27,6 +28,48 @@
   },
   "devDependencies": {
     "@electron/packager": "^20.3.0",
-    "electron": "^44.5.0"
+    "electron": "^44.5.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.widex.desktop",
+    "productName": "Wi-Dex",
+    "copyright": "Darko",
+    "directories": {
+      "output": "dist/installer"
+    },
+    "asar": false,
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!scripts/**",
+      "!tests/**",
+      "!platform-tools/**",
+      "!.claude/**",
+      "!**/*.log",
+      "!data/**"
+    ],
+    "extraResources": [
+      {
+        "from": "platform-tools",
+        "to": "platform-tools"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "app/icon.ico",
+      "executableName": "Wi-Dex"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Wi-Dex",
+      "artifactName": "Wi-Dex-Setup-${version}.${ext}",
+      "installerIcon": "app/icon.ico",
+      "uninstallerIcon": "app/icon.ico"
+    }
   }
 }
