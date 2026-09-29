@@ -22,7 +22,8 @@ function configureLocalTest() {
     autoUpdater.forceDevUpdateConfig = true;
     autoUpdater.setFeedURL({ provider: 'generic', url });
     if (process.env.WIDEX_PRETEND_VERSION) {
-        const { SemVer } = require('semver');
+        // electron-updater's own semver copy (instanceof checks)
+        const { SemVer } = require(require.resolve('semver', { paths: [require.resolve('electron-updater')] }));
         autoUpdater.currentVersion = new SemVer(process.env.WIDEX_PRETEND_VERSION);
     }
     return true;

@@ -44,7 +44,7 @@ function main() {
         }
     }
     console.log('adb bundled from ' + source);
-    execSync('npx electron-builder --win nsis --x64', { cwd: ROOT, stdio: 'inherit' });
+    execSync('npx electron-builder --win nsis --x64 --publish never', { cwd: ROOT, stdio: 'inherit' });
 }
 
 try {
