@@ -35,18 +35,23 @@ public final class Device {
      * Turn the physical screen on or off, while the device stays awake (apps keep running and rendering).
      */
     public static boolean setDisplayPower(int displayId, boolean on) {
-        if (Build.VERSION.SDK_INT >= 35) {
+        // Panel power first: the framework still considers the display ON, so injected touches keep working.
+        // (With DisplayManager.requestDisplayPower(OFF), Android 17 drops touches: "no touchable window".)
+        boolean ok = setPanelPower(on);
+        if (Build.VERSION.SDK_INT >= 35 && (on || !ok)) {
+            // ON: also restore the framework state (in case it was turned off through DisplayManager)
             try {
-                boolean ok = DisplayManagerWrapper.get().requestDisplayPower(displayId, on);
-                Ln.i("Display power " + (on ? "on" : "off") + " (DisplayManager): " + ok);
-                if (ok) {
-                    return true;
-                }
+                boolean dmOk = DisplayManagerWrapper.get().requestDisplayPower(displayId, on);
+                Ln.i("Display power " + (on ? "on" : "off") + " (DisplayManager): " + dmOk);
+                ok = ok || dmOk;
             } catch (ReflectiveOperationException e) {
-                Ln.w("requestDisplayPower() failed, trying SurfaceControl", e);
+                Ln.w("requestDisplayPower() failed", e);
             }
         }
+        return ok;
+    }
 
+    private static boolean setPanelPower(boolean on) {
         int mode = on ? SurfaceControlWrapper.POWER_MODE_NORMAL : SurfaceControlWrapper.POWER_MODE_OFF;
         try {
             if (Build.VERSION.SDK_INT >= 29) {
