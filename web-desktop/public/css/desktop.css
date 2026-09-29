@@ -35,6 +35,12 @@ button { transition: background .18s, border-color .18s, box-shadow .18s, transf
 .desktop-brand strong { color: #fff; font-size: 14px; letter-spacing: -.3px; }
 .brand-divider { width: 1px; height: 14px; background: var(--panel-border); margin: 0 4px; }
 .topbar-date { margin-left: 18px; color: #a5b6d0; }
+.desktop-brand, .desktop-status { flex-shrink: 0; }
+.topbar-tools { flex: 1; min-width: 0; display: flex; justify-content: center; margin: 0 18px; }
+.topbar-tools.hidden { display: none; }
+.topbar-tools .phone-toolbar { min-width: 0; padding: 0; gap: 3px; background: none; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none; text-shadow: none; }
+.topbar-tools .tool-btn { height: 32px; }
+.topbar-tools .stream-stats { margin-left: 10px; padding-left: 12px; border-left: 1px solid rgba(223, 235, 255, .16); }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #a5b6d0; box-shadow: 0 0 0 4px rgba(165, 182, 208, .07); }
 .status-dot.connected { background: #65dab1; box-shadow: 0 0 0 4px rgba(101, 218, 177, .12); }
 .desktop-icons { top: 78px; left: 26px; grid-template-columns: repeat(2, 100px); gap: 15px 10px; }
@@ -197,7 +203,7 @@ select.input option { background: var(--panel-solid); color: var(--text); }
 @media (max-height: 680px) { .desktop-icons { gap: 4px 8px; top: 63px; } .desktop-icon { min-height: 93px; } }
 @media (max-width: 680px) {
     .desktop-topbar { padding: 0 16px; }
-    .desktop-brand > span, .desktop-status { display: none; }
+    .desktop-brand > span, .desktop-status, .topbar-tools .stream-stats { display: none; }
     .desktop-icons { left: 12px; grid-template-columns: repeat(2, 92px); }
     #taskbar { left: 10px; right: 10px; bottom: 10px; gap: 5px; padding: 0 7px; }
     .tray-btn span:last-child { display: none; }

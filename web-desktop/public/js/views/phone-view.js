@@ -117,11 +117,30 @@ export class PhoneView {
         this.messageActions = h('div.row', { style: { justifyContent: 'center' } });
         this.messageEl = h('div.stage-message', this.messageSpinner, this.messageTitle, this.messageText, this.messageActions);
         this.stage = h('div.phone-stage', { tabindex: '0' }, this.canvas, this.layer, this.hud, this.messageEl);
-        this.element = h('div.phone-view', this.toolbar, this.stage);
+        // the toolbar lives in the desktop top bar, so the window is only the phone screen;
+        // in fullscreen it comes back into the view (revealed at the top edge)
+        this.toolbarSlot = document.getElementById('topbar-tools');
+        this.element = h('div.phone-view', this.stage);
+        this.placeToolbar();
 
         this.resizeObserver = new ResizeObserver(() => this.layout());
         this.resizeObserver.observe(this.stage);
         this.updateButtons();
+    }
+
+    placeToolbar() {
+        if (this.toolbarSlot && document.fullscreenElement !== this.element) {
+            this.toolbarSlot.appendChild(this.toolbar);
+        } else {
+            this.element.prepend(this.toolbar);
+        }
+    }
+
+    /** Shows the controls in the top bar only while the phone window is on screen. */
+    setToolbarVisible(visible) {
+        if (this.toolbarSlot) {
+            this.toolbarSlot.classList.toggle('hidden', !visible);
+        }
     }
 
     /**
@@ -612,6 +631,7 @@ export class PhoneView {
             const fullscreen = document.fullscreenElement === this.element;
             this.btnFullscreen.classList.toggle('active', fullscreen);
             this.toolbar.classList.remove('reveal');
+            this.placeToolbar();
             if (!fullscreen && navigator.keyboard && navigator.keyboard.unlock) {
                 navigator.keyboard.unlock();
             }
@@ -789,6 +809,8 @@ export class PhoneView {
 
     destroy() {
         clearInterval(this.statsTimer);
+        this.toolbar.remove();
+        this.setToolbarVisible(false);
         this.resizeObserver.disconnect();
         this.editor.close();
         this.exitGameInput();

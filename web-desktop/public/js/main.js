@@ -47,7 +47,13 @@ class App {
         this.windows = new WindowManager($('#window-container'), $('#taskbar-windows'));
         this.appsMenu = new AppsMenu(this);
         this.phoneApps = new PhoneTaskbar(this, $('#taskbar-phone-apps'));
-        this.windows.onTaskbarUpdate = () => this.phoneApps.render();
+        this.windows.onTaskbarUpdate = () => {
+            this.phoneApps.render();
+            const phone = this.windows.get('phone');
+            if (this.phoneView) {
+                this.phoneView.setToolbarVisible(!!phone && !phone.minimized);
+            }
+        };
         this.windows.onPhoneMinimizeRequest = () => this.phoneApps.minimize();
         this.installDesktop();
         this.startClock();
