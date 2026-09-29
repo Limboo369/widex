@@ -1,0 +1,12 @@
+{
+  "name": "Wi-Dex",
+  "short_name": "Wi-Dex",
+  "description": "Igraj Android igre sa PC-a",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d14",
+  "theme_color": "#0b0d14",
+  "icons": [
+    { "src": "img/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

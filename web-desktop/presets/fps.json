@@ -1,0 +1,26 @@
+{
+  "name": "Pucačina / Battle Royale (PUBG, CoD, Free Fire...)",
+  "description": "WASD kretanje, miš za kameru, levi klik puca, desni nišani. Pomeri dugmad tako da se poklope sa dugmadima u tvojoj igri.",
+  "order": 1,
+  "mouse": { "sensitivity": 1.0, "invertY": false },
+  "cursorKey": "Backquote",
+  "controls": [
+    { "type": "joystick", "x": 0.16, "y": 0.72, "radius": 0.11, "up": "KeyW", "down": "KeyS", "left": "KeyA", "right": "KeyD", "sprint": "ShiftLeft", "sprintScale": 1.7 },
+    { "type": "camera", "x": 0.63, "y": 0.42, "sensitivity": 1.0, "zone": 0.3, "releaseDelay": 300 },
+    { "type": "button", "key": "Mouse0", "x": 0.875, "y": 0.62, "mode": "hold", "label": "Pucaj" },
+    { "type": "button", "key": "Mouse2", "x": 0.94, "y": 0.47, "mode": "tap", "label": "Nišan" },
+    { "type": "button", "key": "Space", "x": 0.94, "y": 0.79, "mode": "hold", "label": "Skok" },
+    { "type": "button", "key": "KeyC", "x": 0.865, "y": 0.9, "mode": "tap", "label": "Čučni" },
+    { "type": "button", "key": "KeyZ", "x": 0.94, "y": 0.92, "mode": "tap", "label": "Legni" },
+    { "type": "button", "key": "KeyR", "x": 0.6, "y": 0.9, "mode": "tap", "label": "Punjenje" },
+    { "type": "button", "key": "KeyF", "x": 0.7, "y": 0.52, "mode": "tap", "label": "Uzmi" },
+    { "type": "button", "key": "Digit1", "x": 0.44, "y": 0.92, "mode": "tap", "label": "Oružje 1" },
+    { "type": "button", "key": "Digit2", "x": 0.52, "y": 0.92, "mode": "tap", "label": "Oružje 2" },
+    { "type": "button", "key": "KeyG", "x": 0.72, "y": 0.9, "mode": "tap", "label": "Bomba" },
+    { "type": "button", "key": "KeyH", "x": 0.66, "y": 0.9, "mode": "tap", "label": "Lečenje" },
+    { "type": "button", "key": "KeyQ", "x": 0.08, "y": 0.42, "mode": "hold", "label": "Viri L" },
+    { "type": "button", "key": "KeyE", "x": 0.16, "y": 0.42, "mode": "hold", "label": "Viri D" },
+    { "type": "button", "key": "KeyM", "x": 0.93, "y": 0.08, "mode": "tap", "label": "Mapa" },
+    { "type": "button", "key": "Tab", "x": 0.07, "y": 0.93, "mode": "tap", "label": "Ranac" }
+  ]
+}

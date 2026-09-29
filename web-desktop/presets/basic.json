@@ -1,0 +1,13 @@
+{
+  "name": "Osnovni (WASD + miš)",
+  "description": "Samo kretanje (WASD), kamera mišem, levi klik i skok. Dobra osnova za bilo koju igru.",
+  "order": 2,
+  "mouse": { "sensitivity": 1.0, "invertY": false },
+  "cursorKey": "Backquote",
+  "controls": [
+    { "type": "joystick", "x": 0.16, "y": 0.72, "radius": 0.11, "up": "KeyW", "down": "KeyS", "left": "KeyA", "right": "KeyD", "sprint": "ShiftLeft", "sprintScale": 1.6 },
+    { "type": "camera", "x": 0.63, "y": 0.42, "sensitivity": 1.0, "zone": 0.3, "releaseDelay": 300 },
+    { "type": "button", "key": "Mouse0", "x": 0.86, "y": 0.66, "mode": "hold", "label": "Akcija" },
+    { "type": "button", "key": "Space", "x": 0.93, "y": 0.8, "mode": "hold", "label": "Skok" }
+  ]
+}

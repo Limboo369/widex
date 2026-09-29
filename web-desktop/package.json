@@ -1,24 +1,26 @@
 {
-  "name": "wi-dex-desktop",
-  "version": "1.0.0",
-  "description": "Universal Android Wi-Fi Desktop Environment & Game Streamer (Samsung DeX alternative for all Android devices)",
-  "main": "server.js",
+  "name": "wi-dex",
+  "version": "2.0.0",
+  "description": "Wi-Dex: igraj Android igre sa PC-a (mis + tastatura) preko Wi-Fi-ja. Pixel/Android telefon -> PC browser ili Windows aplikacija.",
+  "main": "app/main.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js --open",
+    "server": "node server.js",
+    "app": "electron .",
+    "build-server": "node ../android-server/build.js",
+    "package-win": "node scripts/package-win.js"
   },
   "keywords": [
     "android",
-    "dex",
-    "remote-desktop",
+    "adb",
+    "screen-mirroring",
     "game-streaming",
-    "wifi-display",
-    "pointer-lock"
+    "keymapping",
+    "webcodecs"
   ],
-  "author": "Antigravity",
+  "author": "Darko",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.19.2",
     "ws": "^8.17.0"
   }
 }
