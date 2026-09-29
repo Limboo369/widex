@@ -97,7 +97,7 @@ export class WindowManager {
                 h('button.win-btn.win-close', { title: 'Zatvori' }, '✕')));
         const body = h('div.window-body');
         const resize = h('div.window-resize');
-        const element = h('div.window.glass-panel', { id: 'win-' + options.id }, header, body, resize);
+        const element = h('div.window.glass-panel', { id: 'win-' + options.id, role: 'dialog', 'aria-label': options.title }, header, body, resize);
         element.style.left = left + 'px';
         element.style.top = top + 'px';
         element.style.width = width + 'px';
@@ -122,6 +122,7 @@ export class WindowManager {
             setTitle: (title) => {
                 win.title = title;
                 titleText.textContent = title;
+                win.element.setAttribute('aria-label', title);
                 this.updateTaskbar();
             },
         };
@@ -153,7 +154,7 @@ export class WindowManager {
         });
         header.querySelector('.win-min').addEventListener('click', (e) => {
             e.stopPropagation();
-            this.minimize(id);
+            this.requestMinimize(id);
         });
         header.addEventListener('dblclick', (e) => {
             if (!e.target.closest('.win-btn')) {
@@ -257,6 +258,63 @@ export class WindowManager {
         this.updateTaskbar();
     }
 
+    async requestMinimize(id) {
+        if (id === 'phone' && this.onPhoneMinimizeRequest) return this.onPhoneMinimizeRequest();
+        const win = this.get(id);
+        if (!win || win.minimized || win.dockAnimation) return;
+        const target = [...this.taskbar.children].find(button => button.dataset.windowId === id);
+        if (!await this.animateDock(id, target) && this.get(id) === win) this.minimize(id);
+    }
+
+    cancelDockAnimation(id) {
+        const win = this.get(id);
+        if (win && win.dockAnimation) {
+            win.dockAnimation.cancel();
+            win.dockAnimation = null;
+        }
+    }
+
+    /** Genie-inspired funnel to/from the dock. The live canvas and its geometry stay intact. */
+    async animateDock(id, target, opening = false) {
+        const win = this.get(id);
+        if (!win || win.minimized || !target || document.fullscreenElement
+            || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            || typeof win.element.animate !== 'function') return false;
+        this.cancelDockAnimation(id);
+        const from = win.element.getBoundingClientRect();
+        const to = target.getBoundingClientRect();
+        if (!from.width || !from.height || !to.width || !to.height) return false;
+        const dx = to.left + to.width / 2 - from.left - from.width / 2;
+        const dy = to.bottom - from.bottom;
+        const sx = Math.max(.025, Math.min(.4, to.width / from.width));
+        const sy = Math.max(.025, Math.min(.2, to.height / from.height));
+        const full = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+        const flat = { transform: 'translate(0px, 0px) scale(1, 1)', clipPath: full, opacity: 1 };
+        const neck = { transform: `translate(${dx * .34}px, ${dy * .26}px) scale(.64, .76)`, clipPath: 'polygon(0% 0%, 100% 0%, 67% 100%, 33% 100%)', opacity: .96 };
+        const dock = { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, clipPath: full, opacity: 0 };
+        const frames = opening
+            ? [{ ...dock, offset: 0 }, { ...neck, offset: .42 }, { ...flat, transform: 'translate(0px, 0px) scale(1.012, 1.012)', offset: .84 }, { ...flat, offset: 1 }]
+            : [{ ...flat, offset: 0 }, { ...flat, transform: 'translate(0px, 0px) scale(1, .97)', offset: .18 }, { ...neck, offset: .6 }, { ...dock, offset: 1 }];
+        for (const frame of frames) frame.transformOrigin = '50% 100%';
+        const animation = win.element.animate(frames, {
+            duration: opening ? 380 : 280,
+            easing: opening ? 'cubic-bezier(.16, 1, .3, 1)' : 'cubic-bezier(.42, 0, .58, 1)',
+            fill: 'both',
+        });
+        win.dockAnimation = animation;
+        try {
+            await animation.finished;
+            if (this.get(id) !== win || win.dockAnimation !== animation) return false;
+            if (!opening) this.minimize(id);
+            return true;
+        } catch (_) {
+            return false; // Closing the window or disconnecting can cancel the transition.
+        } finally {
+            animation.cancel();
+            if (win.dockAnimation === animation) win.dockAnimation = null;
+        }
+    }
+
     toggleMaximize(id, save = true) {
         const win = this.windows.get(id);
         if (!win) {
@@ -293,6 +351,7 @@ export class WindowManager {
         if (win.onClose && win.onClose() === false) {
             return;
         }
+        this.cancelDockAnimation(id);
         if (win.resizeObserver) {
             win.resizeObserver.disconnect();
         }
@@ -307,7 +366,8 @@ export class WindowManager {
     updateTaskbar() {
         this.taskbar.textContent = '';
         for (const win of this.windows.values()) {
-            const item = h('div.taskbar-item', { title: win.title }, h('span', win.icon), h('span', win.title));
+            if (win.id === 'phone' && this.hidePhoneTaskbarItem) continue;
+            const item = h('button.taskbar-item', { title: win.title, 'aria-label': win.title, dataset: { windowId: win.id } }, h('span', win.icon), h('span', win.title));
             if (this.active === win.id && !win.minimized) {
                 item.classList.add('active');
             }
@@ -318,12 +378,13 @@ export class WindowManager {
                 if (win.minimized) {
                     this.focus(win.id);
                 } else if (this.active === win.id) {
-                    this.minimize(win.id);
+                    this.requestMinimize(win.id);
                 } else {
                     this.focus(win.id);
                 }
             });
             this.taskbar.appendChild(item);
         }
+        if (this.onTaskbarUpdate) this.onTaskbarUpdate();
     }
 }

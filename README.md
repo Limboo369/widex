@@ -143,6 +143,18 @@ Pex/
 
 ## Razvoj
 
+### Pregled dizajna bez telefona
+
+`cd web-desktop` pa `npm run preview-design` otvara izolovani interfejs na `http://localhost:3010`.
+Ovaj pregled ne pokreće adb, ne upravlja telefonom i ne čuva podešavanja. Za stvarni rad koristi postojeće Wi-Dex prečice.
+Novi interfejs koristi lokalne SVG ikonice i pozadinu, bez preuzimanja fontova ili drugih vizuelnih resursa.
+
+Za pregled prebacivanja između aplikacija bez telefona pokreni `node scripts/preview-design.js --taskbar-demo` iz foldera `web-desktop`.
+
+### Više aplikacija u donjoj traci
+
+Otvori aplikacije redom iz Start menija. Svaka dobija svoju stavku u donjoj traci; klik na stavku ponovo otvara tu aplikaciju u zajedničkom prikazu telefona. Aktivna stavka prati aplikaciju u prvom planu. Stavke se čuvaju pri osvježavanju iste sesije i uklanjaju kad prekineš vezu. Ovo su prečice za prebacivanje, a ne nezavisni video prozori ili potvrda da Android drži sve aplikacije u memoriji.
+
 ```bash
 node android-server/build.js
 ```

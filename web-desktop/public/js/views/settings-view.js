@@ -43,7 +43,8 @@ export class SettingsView {
             ['1280x720/180', '1280×720']], o.newDisplay || '1920x1080/240');
         this.audioLatency = select([[40, '40 ms (najmanje kašnjenje)'], [60, '60 ms (preporučeno)'], [100, '100 ms'], [160, '160 ms (najstabilnije)']],
             this.app.audioLatency);
-        this.volume = h('input', { type: 'range', min: '0', max: '1', step: '0.05', value: String(this.app.volume) });
+        this.volume = h('input.volume-slider', { type: 'range', 'data-volume-control': '', 'aria-label': 'Jačina zvuka', min: '0', max: '1', step: '0.01', value: String(this.app.volume) });
+        this.volume.style.setProperty('--volume-progress', Math.round(this.app.volume * 100) + '%');
         this.volume.addEventListener('input', () => this.app.setVolume(parseFloat(this.volume.value)));
         this.audioLatency.addEventListener('change', () => this.app.setAudioLatency(parseInt(this.audioLatency.value, 10)));
 
@@ -56,6 +57,8 @@ export class SettingsView {
         this.infoEl = h('div.small.muted');
 
         this.element = h('div.view',
+            h('div.view-intro', h('div.view-intro-icon', '⚙️'),
+                h('div', h('h2', 'Po tvojoj mjeri.'), h('p', 'Slika, zvuk i kontrole za tvoj način rada.'))),
             h('div.section',
                 h('h3', '🎞️ Slika'),
                 h('div.row',

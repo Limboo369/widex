@@ -4,6 +4,8 @@
 import { $, $$, h, toast } from './util/dom.js';
 import { api } from './api.js';
 import { WindowManager } from './ui/windows.js';
+import { PhoneTaskbar } from './ui/phone-taskbar.js';
+import { icon, mountIcons } from './ui/icons.js';
 import { StreamConnection } from './stream/connection.js';
 import { AudioPlayer } from './stream/audio.js';
 import { PhoneView } from './views/phone-view.js';
@@ -41,8 +43,12 @@ class App {
     }
 
     async init() {
-        this.windows = new WindowManager($('#window-container'), $('#taskbar-apps'));
+        mountIcons();
+        this.windows = new WindowManager($('#window-container'), $('#taskbar-windows'));
         this.appsMenu = new AppsMenu(this);
+        this.phoneApps = new PhoneTaskbar(this, $('#taskbar-phone-apps'));
+        this.windows.onTaskbarUpdate = () => this.phoneApps.render();
+        this.windows.onPhoneMinimizeRequest = () => this.phoneApps.minimize();
         this.installDesktop();
         this.startClock();
 
@@ -118,7 +124,37 @@ class App {
                 toast('Prvo poveži telefon', 'warn');
             }
         });
-        $('#tray-audio').addEventListener('click', () => this.toggleMute());
+        const audioButton = $('#tray-audio');
+        const volumePanel = $('#volume-panel');
+        const hideVolume = () => {
+            volumePanel.classList.add('hidden');
+            audioButton.setAttribute('aria-expanded', 'false');
+        };
+        audioButton.addEventListener('click', () => {
+            const opening = volumePanel.classList.contains('hidden');
+            volumePanel.classList.toggle('hidden', !opening);
+            audioButton.setAttribute('aria-expanded', String(opening));
+            if (opening) {
+                this.appsMenu.hide();
+                $('#volume-slider').focus();
+            }
+        });
+        $('#volume-slider').addEventListener('input', (event) => {
+            this.setVolume(Number(event.target.value));
+            if (this.muted && this.volume > 0) this.toggleMute();
+        });
+        $('#volume-mute').addEventListener('click', () => this.toggleMute());
+        document.addEventListener('pointerdown', (event) => {
+            if (!volumePanel.contains(event.target) && !audioButton.contains(event.target)) hideVolume();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !volumePanel.classList.contains('hidden')) {
+                event.preventDefault();
+                event.stopPropagation();
+                hideVolume();
+                audioButton.focus();
+            }
+        });
         $('#tray-ping').addEventListener('click', () => this.openConnect());
         $('#tray-battery').addEventListener('click', () => this.openPhone());
         this.updateTray();
@@ -158,6 +194,7 @@ class App {
         const clock = $('#clock');
         const update = () => {
             clock.textContent = new Date().toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
+            $('#desktop-date').textContent = new Date().toLocaleDateString('sr-Latn', { weekday: 'short', day: 'numeric', month: 'long' });
         };
         update();
         setInterval(update, 5000);
@@ -168,14 +205,28 @@ class App {
         $('#tray-game').classList.toggle('on', !!gameOn);
         $('#tray-game-text').textContent = gameOn ? 'Uklj.' : 'Isklj.';
         $('#tray-audio-text').textContent = this.muted ? 'Nem' : Math.round(this.volume * 100) + '%';
-        $('#tray-audio').firstChild.textContent = this.muted ? '🔇 ' : '🔊 ';
+        $('#tray-audio-icon').replaceChildren(icon(this.muted ? 'muted' : 'volume'));
+        $('#volume-value').textContent = Math.round(this.volume * 100) + '%';
+        $('#volume-mute-icon').replaceChildren(icon(this.muted ? 'muted' : 'volume'));
+        $('#volume-mute-label').textContent = this.muted ? 'Uključi zvuk' : 'Utišaj';
+        $('#volume-mute').setAttribute('aria-pressed', String(this.muted));
+        $('#volume-hint').textContent = this.muted || this.volume === 0 ? 'Zvuk je utišan' : 'Zvuk je uključen';
+        for (const control of $$('[data-volume-control]')) {
+            control.value = String(this.volume);
+            control.style.setProperty('--volume-progress', Math.round(this.volume * 100) + '%');
+            control.setAttribute('aria-valuetext', Math.round(this.volume * 100) + '%');
+        }
         $('#tray-ping-text').textContent = this.ping !== null ? this.ping + ' ms' : '--';
         const battery = this.session && this.session.battery;
-        $('#tray-battery-text').textContent = battery ? battery.level + '%' + (battery.charging ? ' ⚡' : '') : '--';
+        $('#tray-battery-text').textContent = battery ? battery.level + '%' : '--';
+        $('#tray-battery').title = battery && battery.charging ? 'Baterija telefona · Punjenje' : 'Baterija telefona';
 
         const name = this.device ? (this.device.manufacturer + ' ' + this.device.model) : 'Telefon nije povezan';
         $('#start-device-name').textContent = name;
         const status = $('#start-device-status');
+        const connected = this.session && this.session.state === 'running';
+        $('#desktop-connection-status').textContent = connected ? name + ' · Povezano' : 'Spreman za povezivanje';
+        $('#desktop-status-dot').classList.toggle('connected', !!connected);
         if (this.session && this.session.state === 'running') {
             status.textContent = 'Povezano' + (this.device ? ' · Android ' + this.device.release : '');
             status.className = 'tag ok';
@@ -216,7 +267,8 @@ class App {
                 if (this.phoneView && this.phoneView.gameMode) {
                     this.phoneView.toggleGameMode(false);
                 }
-                // keep the stream alive in the background; closing the window only hides it
+                this.phoneApps.closeCurrent();
+                // Other dock apps continue sharing this phone connection.
                 return true;
             },
         });
@@ -400,6 +452,7 @@ class App {
         this.lastStopReason = null;
         this.device = session.device || this.device;
         this.foreground = session.foreground || null;
+        this.phoneApps.attach(session);
         this.ensurePhoneView();
         this.phoneView.onStreamStarting();
         this.openPhone();
@@ -412,6 +465,8 @@ class App {
                 }
                 this.conn = null;
                 this.session = null;
+                this.foreground = null;
+                this.phoneApps.clear();
                 this.stats = {};
                 this.ping = null;
                 this.updateTray();
@@ -441,6 +496,10 @@ class App {
             this.phoneView.toggleGameMode(false);
         }
         this.session = null;
+        this.foreground = null;
+        this.phoneApps.clear();
+        this.appsMenu.apps = [];
+        this.appsMenu.serial = null;
         this.ping = null;
         this.stats = {};
     }
@@ -510,6 +569,7 @@ class App {
                 const pkg = event.package || null;
                 const changed = !this.foreground || this.foreground.package !== pkg;
                 this.foreground = pkg ? { package: pkg, component: event.component } : null;
+                this.phoneApps.onForeground(pkg);
                 if (changed && this.phoneView) {
                     this.phoneView.onForegroundChanged(pkg);
                 }
@@ -613,6 +673,8 @@ class App {
     }
 
     setVolume(volume) {
+        if (!Number.isFinite(volume)) return;
+        volume = Math.min(1, Math.max(0, volume));
         this.volume = volume;
         localStorage.setItem('widex.volume', String(volume));
         this.audio.setVolume(volume);

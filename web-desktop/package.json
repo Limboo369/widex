@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js --open",
     "server": "node server.js",
+    "preview-design": "node scripts/preview-design.js",
+    "test": "node --experimental-vm-modules --test tests/*.test.cjs",
     "app": "electron .",
     "build-server": "node ../android-server/build.js",
     "package-win": "node scripts/package-win.js"

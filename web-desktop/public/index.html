@@ -7,32 +7,46 @@
     <link rel="icon" href="img/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/desktop.css">
+    <link rel="stylesheet" href="css/liquid-glass.css">
 </head>
 <body>
+    <svg class="glass-optics" width="0" height="0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="glass-refraction" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="2" seed="8" result="lens"/>
+                <feDisplacementMap in="SourceGraphic" in2="lens" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
     <div id="desktop">
+        <header class="desktop-topbar">
+            <div class="desktop-brand"><img src="img/icon.svg" alt=""><strong>Wi-Dex</strong><span class="brand-divider"></span><span>Radni prostor</span></div>
+            <div class="desktop-status"><span class="status-dot" id="desktop-status-dot"></span><span id="desktop-connection-status">Spreman za povezivanje</span><span class="topbar-date" id="desktop-date"></span></div>
+        </header>
         <div class="desktop-icons">
             <button class="desktop-icon" data-action="phone">
-                <div class="icon-img">📱</div>
+                <div class="icon-img" data-icon="phone"></div>
                 <span>Telefon</span>
             </button>
             <button class="desktop-icon" data-action="apps">
-                <div class="icon-img">🎮</div>
+                <div class="icon-img" data-icon="game"></div>
                 <span>Igre i aplikacije</span>
             </button>
             <button class="desktop-icon" data-action="keymap">
-                <div class="icon-img">⌨️</div>
+                <div class="icon-img" data-icon="keyboard"></div>
                 <span>Mapiranje tastera</span>
             </button>
             <button class="desktop-icon" data-action="connect">
-                <div class="icon-img">📶</div>
+                <div class="icon-img" data-icon="wifi"></div>
                 <span>Povezivanje</span>
             </button>
             <button class="desktop-icon" data-action="settings">
-                <div class="icon-img">⚙️</div>
+                <div class="icon-img" data-icon="settings"></div>
                 <span>Podešavanja</span>
             </button>
             <button class="desktop-icon" data-action="help">
-                <div class="icon-img">❔</div>
+                <div class="icon-img" data-icon="help"></div>
                 <span>Pomoć</span>
             </button>
         </div>
@@ -42,7 +56,7 @@
         <div id="start-menu" class="glass-panel hidden">
             <div class="start-header">
                 <div class="start-device">
-                    <div class="avatar">📱</div>
+                    <div class="avatar" data-icon="phone"></div>
                     <div>
                         <h4 id="start-device-name">Telefon nije povezan</h4>
                         <span id="start-device-status" class="tag">Nije povezano</span>
@@ -50,7 +64,7 @@
                 </div>
                 <div class="start-search">
                     <input type="text" id="app-search" class="input" placeholder="Pretraži igre i aplikacije..." autocomplete="off">
-                    <button class="btn" id="btn-refresh-apps" title="Ponovo učitaj listu sa telefona">⟳</button>
+                    <button class="btn" id="btn-refresh-apps" title="Ponovo učitaj listu sa telefona" aria-label="Osvježi aplikacije" data-icon="refresh"></button>
                 </div>
                 <label class="check small"><input type="checkbox" id="show-system-apps"> Prikaži i sistemske aplikacije</label>
             </div>
@@ -59,21 +73,28 @@
                 <div id="apps-message" class="muted small"></div>
             </div>
             <div class="start-footer">
-                <button class="btn btn-sm" id="btn-start-screen">💡 Ekran telefona</button>
+                <button class="btn btn-sm" id="btn-start-screen"><span data-icon="light"></span> Ekran telefona</button>
                 <button class="btn btn-sm btn-danger" id="btn-start-disconnect">Prekini vezu</button>
             </div>
         </div>
 
         <div id="taskbar" class="glass-panel">
-            <button id="start-btn" title="Igre i aplikacije">⚡</button>
-            <div id="taskbar-apps" class="taskbar-apps"></div>
+            <button id="start-btn" title="Igre i aplikacije" aria-label="Otvori igre i aplikacije" aria-expanded="false" aria-controls="start-menu"><span data-icon="grid"></span></button>
+            <div class="dock-separator"></div>
+            <div id="taskbar-apps" class="taskbar-apps"><div id="taskbar-windows" class="taskbar-group"></div><div id="taskbar-phone-apps" class="taskbar-group"></div></div>
             <div class="taskbar-right">
-                <button class="tray-btn" id="tray-game" title="Režim igre (F8)">🎮 <span id="tray-game-text">Isklj.</span></button>
-                <button class="tray-btn" id="tray-audio" title="Zvuk (klik = isključi/uključi)">🔊 <span id="tray-audio-text">--</span></button>
-                <button class="tray-btn" id="tray-ping" title="Kašnjenje (ping do telefona)">📶 <span id="tray-ping-text">--</span></button>
-                <button class="tray-btn" id="tray-battery" title="Baterija telefona">🔋 <span id="tray-battery-text">--</span></button>
+                <button class="tray-btn" id="tray-game" title="Režim igre (F8)"><span data-icon="game"></span><span id="tray-game-text">Isklj.</span></button>
+                <button class="tray-btn" id="tray-audio" title="Jačina zvuka" aria-label="Kontrola zvuka" aria-expanded="false" aria-controls="volume-panel"><span id="tray-audio-icon" data-icon="volume"></span><span id="tray-audio-text">--</span></button>
+                <button class="tray-btn" id="tray-ping" title="Kašnjenje (ping do telefona)"><span data-icon="wifi"></span><span id="tray-ping-text">--</span></button>
+                <button class="tray-btn" id="tray-battery" title="Baterija telefona"><span data-icon="battery"></span><span id="tray-battery-text">--</span></button>
                 <div id="clock" class="clock">00:00</div>
             </div>
+        </div>
+        <div id="volume-panel" class="volume-panel glass-panel hidden" role="dialog" aria-labelledby="volume-panel-title">
+            <div class="volume-panel-header"><div><h3 id="volume-panel-title">Zvuk telefona</h3><p>Jačina zvuka na računaru</p></div><output id="volume-value" for="volume-slider">100%</output></div>
+            <label class="sr-only" for="volume-slider">Jačina zvuka</label>
+            <input id="volume-slider" class="volume-slider" data-volume-control type="range" min="0" max="1" step="0.01" value="1">
+            <div class="volume-panel-footer"><button id="volume-mute" class="btn btn-sm" aria-pressed="false"><span id="volume-mute-icon" data-icon="volume"></span><span id="volume-mute-label">Utišaj</span></button><span id="volume-hint">Zvuk je uključen</span></div>
         </div>
     </div>
 

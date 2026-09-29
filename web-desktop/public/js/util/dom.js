@@ -1,3 +1,5 @@
+import { iconText } from '../ui/icons.js';
+
 /**
  * Small DOM helpers.
  */
@@ -59,7 +61,8 @@ function appendChildren(el, children) {
         } else if (child instanceof Node) {
             el.appendChild(child);
         } else {
-            el.appendChild(document.createTextNode(String(child)));
+            el.appendChild(['OPTION', 'TEXTAREA', 'SCRIPT', 'STYLE'].includes(el.tagName)
+                ? document.createTextNode(String(child)) : iconText(String(child)));
         }
     }
 }

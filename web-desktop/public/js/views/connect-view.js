@@ -35,8 +35,8 @@ export class ConnectView {
         this.deviceList = h('div.device-list');
         this.deviceNotice = h('div');
 
-        this.pairAddress = h('input.input', { placeholder: 'npr. 192.168.1.40:37123', style: { flex: '2' } });
-        this.pairCode = h('input.input.code', { placeholder: '123456', maxlength: '6', inputmode: 'numeric', style: { flex: '1', minWidth: '110px' } });
+        this.pairAddress = h('input.input', { 'aria-label': 'IP adresa i port za uparivanje', placeholder: 'npr. 192.168.1.40:37123', style: { flex: '2' } });
+        this.pairCode = h('input.input.code', { 'aria-label': 'Kod za uparivanje', placeholder: '123456', maxlength: '6', inputmode: 'numeric', style: { flex: '1', minWidth: '110px' } });
         this.pairButton = h('button.btn.btn-primary', { onclick: () => this.pair() }, '🔗 Upari');
         this.pairStatus = h('div.small.muted');
         this.pairCode.addEventListener('keydown', (e) => {
@@ -45,7 +45,7 @@ export class ConnectView {
             }
         });
 
-        this.connectAddress = h('input.input', { placeholder: 'npr. 192.168.1.40:41235', value: this.app.config.lastAddress || '', style: { flex: '2' } });
+        this.connectAddress = h('input.input', { 'aria-label': 'IP adresa i port za povezivanje', placeholder: 'npr. 192.168.1.40:41235', value: this.app.config.lastAddress || '', style: { flex: '2' } });
         this.connectButton = h('button.btn', { onclick: () => this.connect(this.connectAddress.value) }, '📶 Poveži');
         this.discovered = h('div.device-list');
         this.connectAddress.addEventListener('keydown', (e) => {
@@ -65,7 +65,9 @@ export class ConnectView {
         this.screenOff = h('input', { type: 'checkbox', checked: !!options.turnScreenOff });
         this.screenOff.addEventListener('change', () => this.saveQuick());
 
-        this.element = h('div.view',
+        this.element = h('div.view.connect-view',
+            h('div.view-intro', h('div.view-intro-icon', '📶'),
+                h('div', h('h2', 'Tvoj telefon, na računaru.'), h('p', 'Jedna veza za igre, aplikacije i sve između.'))),
             h('div.section',
                 h('div.section-title', h('h3', '📱 Telefon'), h('button.btn.btn-sm', { onclick: () => this.refresh() }, '⟳ Osveži')),
                 this.deviceNotice,
@@ -78,8 +80,8 @@ export class ConnectView {
                     h('small', 'Dok je Wi-Dex povezan, zvuk ide na PC (telefon je nem).'))),
                 h('label.check', this.screenOff, h('span.check-text', 'Ugasi ekran telefona tokom igranja',
                     h('small', 'Igra nastavlja da radi, telefon se manje greje i štedi bateriju.')))),
-            h('div.section',
-                h('h3', '📶 Bežično povezivanje — prvi put (uparivanje)'),
+            h('details.section',
+                h('summary', h('h3', '📶 Prvo povezivanje · Upari telefon')),
                 h('ol.steps',
                     h('li', 'Na telefonu uključi ', h('b', 'Opcije za programere'), ': Podešavanja → O telefonu → 7 puta dodirni ',
                         h('b', 'Broj verzije'), ' (Build number).'),
@@ -91,8 +93,8 @@ export class ConnectView {
                         ' sa tog prozora na telefonu.')),
                 h('div.row', this.pairAddress, this.pairCode, this.pairButton),
                 this.pairStatus),
-            h('div.section',
-                h('h3', '🔌 Već upareno? Poveži se'),
+            h('details.section',
+                h('summary', h('h3', '🔌 Već upareno? Poveži se ručno')),
                 h('p.small', 'Na ekranu „Bežično otklanjanje grešaka“ piše ', h('i', 'IP adresa i port'),
                     ' (port se menja kad ponovo uključiš opciju). Telefon se obično poveže i sam.'),
                 h('div.row', this.connectAddress, this.connectButton),
@@ -206,6 +208,7 @@ export class ConnectView {
         if (pairing.length && !this.pairAddress.value) {
             this.pairAddress.value = pairing[0].address;
             this.pairStatus.textContent = '✅ Pronađen telefon koji čeka uparivanje: ' + pairing[0].address + ' — unesi kod.';
+            this.pairCode.closest('details').open = true;
             this.pairCode.focus();
         }
 

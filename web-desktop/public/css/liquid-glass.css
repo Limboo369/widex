@@ -1,0 +1,65 @@
+/* Clear glass for floating controls; softer glass behind reading surfaces.
+   SVG displacement bends the sampled backdrop, never the text or phone video. */
+:root {
+    --panel-bg: rgba(5, 9, 17, .5);
+    --glass-surface: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .01) 38%, rgba(255, 255, 255, .035)), var(--panel-bg);
+    --glass-edge: rgba(255, 255, 255, .2);
+    --glass-shadow: 0 14px 42px rgba(3, 8, 23, .3), 0 3px 8px rgba(3, 8, 23, .18), inset 0 .5px 0 rgba(255, 255, 255, .3), inset 0 -.5px 0 rgba(255, 255, 255, .1);
+}
+.glass-optics { position: fixed; pointer-events: none; }
+.glass-panel { backdrop-filter: blur(18px) saturate(135%); -webkit-backdrop-filter: blur(18px) saturate(135%); }
+#taskbar, .volume-panel, .keymap-toolbar {
+    background: radial-gradient(ellipse at 12% 0%, rgba(255, 255, 255, .16), transparent 55%), linear-gradient(170deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .015) 48%, rgba(255, 255, 255, .065)), rgba(4, 8, 16, .36);
+    backdrop-filter: blur(6px) saturate(135%);
+    -webkit-backdrop-filter: blur(6px) saturate(135%);
+    border: .5px solid rgba(255, 255, 255, .24);
+    box-shadow: var(--glass-shadow);
+}
+@supports (backdrop-filter: url('#glass-refraction')) {
+    #taskbar, .volume-panel, .keymap-toolbar {
+        backdrop-filter: url('#glass-refraction') blur(6px) saturate(135%);
+        -webkit-backdrop-filter: url('#glass-refraction') blur(6px) saturate(135%);
+    }
+}
+/* A thin bevel catches light on opposite corners without covering controls. */
+#taskbar::before, .volume-panel::before, #start-menu::before, .window::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: .5px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, .04) 32%, rgba(255, 255, 255, .02) 62%, rgba(255, 255, 255, .28));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+}
+#taskbar { border-radius: 32px; }
+#start-menu { background: var(--glass-surface); border-radius: 30px; }
+.volume-panel { border-radius: 28px; }
+.window { background: var(--glass-surface); border-radius: 26px; border-width: .5px; }
+#start-menu { border-width: .5px; }
+.window.focused { border-color: var(--glass-edge); box-shadow: var(--glass-shadow); }
+.window-header { background: linear-gradient(180deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .025)); }
+.desktop-topbar { background: rgba(4, 8, 16, .32); backdrop-filter: blur(10px) saturate(135%); -webkit-backdrop-filter: blur(10px) saturate(135%); border-bottom-width: .5px; border-bottom-color: rgba(255, 255, 255, .15); }
+.section { background: rgba(12, 22, 40, .13); border-color: rgba(255, 255, 255, .12); }
+.taskbar-item, .tray-btn, #start-btn { border-radius: 22px; }
+.taskbar-item.active { background: linear-gradient(160deg, rgba(255, 255, 255, .23), rgba(255, 255, 255, .075)); border-color: rgba(255, 255, 255, .35); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 2px 5px rgba(0, 0, 0, .08); }
+#start-btn { background: linear-gradient(145deg, rgba(225, 238, 255, .75), rgba(155, 184, 248, .3)); color: #172846; border-color: rgba(255, 255, 255, .6); box-shadow: inset 0 1px 2px rgba(255, 255, 255, .8), 0 2px 8px rgba(0, 0, 0, .13); }
+.btn, .input, select.input { border-radius: 18px; }
+.desktop-icon .icon-img { background: linear-gradient(145deg, rgba(172, 204, 255, .45), rgba(67, 111, 202, .18)); border-color: rgba(255, 255, 255, .45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: inset 0 1px 2px rgba(255, 255, 255, .6), inset 0 -1px 1px rgba(255, 255, 255, .15), 0 5px 15px rgba(0, 0, 0, .18); }
+.desktop-icon:nth-child(2) .icon-img { background: linear-gradient(145deg, rgba(140, 233, 210, .4), rgba(36, 149, 130, .16)); }
+.desktop-icon:nth-child(3) .icon-img { background: linear-gradient(145deg, rgba(218, 192, 255, .45), rgba(136, 87, 207, .17)); }
+.desktop-icon:nth-child(4) .icon-img { background: linear-gradient(145deg, rgba(166, 231, 255, .4), rgba(54, 152, 195, .16)); }
+.desktop-icon:nth-child(5) .icon-img { background: linear-gradient(145deg, rgba(225, 236, 255, .4), rgba(111, 137, 179, .17)); }
+.desktop-icon:nth-child(6) .icon-img { background: linear-gradient(145deg, rgba(194, 210, 255, .45), rgba(91, 108, 211, .18)); }
+#taskbar, .desktop-topbar { color: #f2f6ff; text-shadow: 0 1px 3px rgba(0, 0, 0, .45); }
+.tray-btn, .clock, .desktop-status { color: #e7eefb; }
+@media (prefers-reduced-transparency: reduce) {
+    .glass-panel, #taskbar, #start-menu, .volume-panel, .window, .desktop-topbar, .keymap-toolbar { background: var(--panel-solid); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+    .glass-panel, #taskbar, #start-menu, .volume-panel, .window, .desktop-topbar, .keymap-toolbar { background: var(--panel-solid); }
+}

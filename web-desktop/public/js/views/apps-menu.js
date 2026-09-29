@@ -62,6 +62,7 @@ export class AppsMenu {
 
     show() {
         this.menu.classList.remove('hidden');
+        $('#start-btn').setAttribute('aria-expanded', 'true');
         this.search.value = '';
         this.search.focus();
         const serial = this.app.currentSerial();
@@ -74,6 +75,7 @@ export class AppsMenu {
 
     hide() {
         this.menu.classList.add('hidden');
+        $('#start-btn').setAttribute('aria-expanded', 'false');
     }
 
     async load(refresh) {
@@ -90,8 +92,13 @@ export class AppsMenu {
         this.message.replaceChildren(h('span.spinner'), ' Učitavam aplikacije sa telefona...');
         try {
             const data = await api.apps(serial, refresh);
+            if (this.app.currentSerial() !== serial) {
+                this.loading = false;
+                return;
+            }
             this.apps = data.apps;
             this.serial = serial;
+            this.app.phoneApps.refreshMetadata();
         } catch (e) {
             this.message.textContent = 'Greška: ' + e.message;
             this.loading = false;
@@ -110,7 +117,10 @@ export class AppsMenu {
         this.grid.textContent = '';
         const serial = this.app.currentSerial();
         if (!serial) {
-            this.message.textContent = 'Prvo poveži telefon.';
+            this.message.replaceChildren(h('div.apps-empty',
+                h('div.view-intro-icon', '📱'), h('h3', 'Tvoje aplikacije stižu s telefonom.'),
+                h('p', 'Poveži uređaj i otvori svoje igre i aplikacije ovdje.'),
+                h('button.btn.btn-primary', { onclick: () => { this.hide(); this.app.openConnect(); } }, '📶 Poveži telefon')));
             return;
         }
         const query = this.search.value.trim().toLowerCase();
@@ -139,13 +149,8 @@ export class AppsMenu {
 
     async launch(app) {
         this.hide();
-        try {
-            const displayId = this.app.session && this.app.session.options.newDisplay && this.app.videoDisplayId ? this.app.videoDisplayId : 0;
-            await api.launchApp(this.app.currentSerial(), app.component || app.package, displayId);
-            this.app.openPhone();
+        if (await this.app.phoneApps.launch(app)) {
             toast('Pokrećem ' + app.label, 'info', 2000);
-        } catch (e) {
-            toast('Ne mogu da pokrenem ' + app.label + ': ' + e.message, 'error');
         }
     }
 }

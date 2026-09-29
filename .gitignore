@@ -22,3 +22,6 @@ Thumbs.db
 
 # Windows shortcuts (absolute paths)
 *.lnk
+
+# Bundled adb for the installer (copied at build time)
+web-desktop/platform-tools/

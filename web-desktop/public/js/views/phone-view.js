@@ -2,6 +2,7 @@
  * Phone window: video stream, toolbar, desktop input (mouse = finger) and game mode (key mapping).
  */
 import { h, toast, formatBitrate, isTextInput } from '../util/dom.js';
+import { icon, iconText } from '../ui/icons.js';
 import { VideoPlayer } from '../stream/video.js';
 import { androidKeycode, metaState, keyName, AKEY } from '../input/keycodes.js';
 import { GameMapper } from '../input/game-mapper.js';
@@ -36,6 +37,7 @@ export class PhoneView {
             onRequestKeyframe: () => this.app.send({ t: 'keyframe' }),
             onError: (message) => this.showMessage('⚠️ Problem sa videom', message),
             onFrame: () => {
+                this.app.phoneApps?.onVideoFrame();
                 if (!this.firstFrameShown) {
                     this.firstFrameShown = true;
                     this.hideMessage();
@@ -126,7 +128,7 @@ export class PhoneView {
      * @param {Array} actions [{label, onClick, primary}]
      */
     showMessage(title, text, spinner = false, actions = []) {
-        this.messageTitle.textContent = title;
+        this.messageTitle.replaceChildren(iconText(title));
         this.messageText.textContent = text || '';
         this.messageSpinner.classList.toggle('hidden', !spinner);
         this.messageActions.textContent = '';
@@ -248,7 +250,7 @@ export class PhoneView {
         const screenOn = this.app.session ? this.app.session.screenOn !== false : true;
         this.btnScreen.classList.toggle('warn', !screenOn);
         this.btnScreen.title = screenOn ? 'Ugasi ekran telefona (igra nastavlja da radi)' : 'Upali ekran telefona';
-        this.btnAudio.textContent = this.app.muted ? '🔇' : '🔊';
+        this.btnAudio.replaceChildren(icon(this.app.muted ? 'muted' : 'volume'));
     }
 
     // ------------------------------------------------------------------ commands
@@ -445,11 +447,11 @@ export class PhoneView {
         hud.classList.remove('hidden');
         const cursorKey = keyName(this.mapper.getCursorKey());
         if (this.cursorMode) {
-            hud.textContent = '🖱️ Kursor slobodan — pritisni ' + cursorKey + ' za povratak u igru';
+            hud.replaceChildren(iconText('🖱️ Kursor slobodan — pritisni ' + cursorKey + ' za povratak u igru'));
         } else if (!this.pointerLocked) {
-            hud.textContent = '🎮 Klikni na sliku da miš kontroliše igru';
+            hud.replaceChildren(iconText('🎮 Klikni na sliku da miš kontroliše igru'));
         } else {
-            hud.textContent = '🎮 ' + (this.profile ? this.profile.name : '') + ' — ' + cursorKey + ' kursor · F9 mapiranje · F8 izlaz';
+            hud.replaceChildren(iconText('🎮 ' + (this.profile ? this.profile.name : '') + ' — ' + cursorKey + ' kursor · F9 mapiranje · F8 izlaz'));
             this.hudTimer = setTimeout(() => hud.classList.add('faded'), 3500);
         }
     }
