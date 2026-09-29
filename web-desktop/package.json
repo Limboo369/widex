@@ -1,0 +1,24 @@
+{
+  "name": "wi-dex-desktop",
+  "version": "1.0.0",
+  "description": "Universal Android Wi-Fi Desktop Environment & Game Streamer (Samsung DeX alternative for all Android devices)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "android",
+    "dex",
+    "remote-desktop",
+    "game-streaming",
+    "wifi-display",
+    "pointer-lock"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}
