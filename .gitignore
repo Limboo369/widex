@@ -4,8 +4,6 @@ node_modules/
 # Build outputs / caches
 **/build/
 **/.gradle/
-android/local.properties
-legacy/**/local.properties
 web-desktop/dist/
 web-desktop/app/dist/
 android-server/out/

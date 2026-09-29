@@ -129,16 +129,15 @@ Pex/
 ├── android-server/             Java server za telefon
 │   ├── build.js                build bez Gradle-a (javac + d8 iz Android SDK)
 │   └── src/com/widex/server/   video, zvuk, kontrola, pomoćne klase
-├── web-desktop/
-│   ├── server.js               Node.js server (HTTP API + WebSocket)
-│   ├── lib/                    adb, sesija, protokol, aplikacije, podaci
-│   ├── public/                 web interfejs (desktop, video, zvuk, režim igre, editor)
-│   ├── presets/                šabloni mapiranja (pucačina, MOBA, osnovni)
-│   ├── bin/widex-server.jar    izgrađen server (šalje se na telefon)
-│   ├── app/                    Windows aplikacija (Electron)
-│   ├── scripts/                pakovanje u .exe, ikonica
-│   └── dist/                   Wi-Dex.exe (napravi se komandom `npm run package-win`)
-└── legacy/                     stara verzija (Android aplikacija), ne koristi se
+└── web-desktop/
+    ├── server.js               Node.js server (HTTP API + WebSocket)
+    ├── lib/                    adb, sesija, protokol, aplikacije, podaci
+    ├── public/                 web interfejs (desktop, video, zvuk, režim igre, editor)
+    ├── presets/                šabloni mapiranja (pucačina, MOBA, osnovni)
+    ├── bin/widex-server.jar    izgrađen server (šalje se na telefon)
+    ├── app/                    Windows aplikacija (Electron)
+    ├── scripts/                pakovanje u .exe i instalater, ikonica
+    └── dist/                   Wi-Dex.exe i instalater (`npm run package-win`, `npm run installer`)
 ```
 
 ## Razvoj
@@ -178,10 +177,4 @@ Zauzima oko 10.5 GB. Ako ti ne treba, obriši ga u Android Studio: *Device Manag
 
 ## Stara verzija
 
-Prvi prototip (Android aplikacija sa MediaProjection + Accessibility) je u `legacy/` i u prvom git commit-u. Zamenjen je jer taj pristup nije mogao da pruži multitouch za igre, rad sa ugašenim ekranom ni pravi zvuk.
-
-Vraćanje stare verzije:
-
-```bash
-git checkout b31c427
-```
+Prvi prototip (Android aplikacija sa MediaProjection + Accessibility) je zamenjen jer taj pristup nije mogao da pruži multitouch za igre, rad sa ugašenim ekranom ni pravi zvuk. Uklonjen je iz projekta.
