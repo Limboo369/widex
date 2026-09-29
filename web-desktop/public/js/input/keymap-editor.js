@@ -418,6 +418,17 @@ export class KeymapEditor {
             });
             label.addEventListener('change', () => this.render());
             panel.appendChild(h('div.field', h('label', 'Opis (opciono)'), label));
+            const drag = h('input', { type: 'checkbox', checked: !!def.drag });
+            drag.addEventListener('change', () => {
+                def.drag = drag.checked;
+                if (drag.checked) {
+                    def.mode = 'hold';
+                    mode.value = 'hold';
+                }
+                this.dirty = true;
+            });
+            panel.appendChild(h('label.check', drag, h('span.check-text', 'Miš pomera ovo dugme dok ga držiš',
+                h('small', 'Za „slobodan pogled“ (oko 👁 u PUBG-u) i slično.'))));
         } else if (def.type === 'joystick') {
             panel.appendChild(h('h4', 'Džojstik (kretanje)'));
             panel.appendChild(h('div.row',

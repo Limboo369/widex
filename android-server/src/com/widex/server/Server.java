@@ -235,6 +235,7 @@ public final class Server {
                 audio.stop();
             }
             powerState.restore();
+            Device.restoreRotation(powerDisplayId);
             Device.releaseWakeLock();
             connection.close();
         }

@@ -372,11 +372,12 @@ export class PhoneView {
     }
 
     async loadProfileFor(pkg) {
+        const saved = new Set(this.app.profiles.map((p) => p.package));
         let profile = null;
-        if (pkg) {
+        if (pkg && saved.has(pkg)) {
             profile = await api.profile(pkg);
         }
-        if (!profile) {
+        if (!profile && saved.has('default')) {
             profile = await api.profile('default');
         }
         if (!profile) {

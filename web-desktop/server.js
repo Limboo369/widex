@@ -378,10 +378,47 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
     return { server, port: actualPort, url, sessions, adb, shutdown };
 }
 
-module.exports = { startServer };
+/**
+ * Return the info of a Wi-Dex server already running on this port (e.g. the Windows app), or null.
+ */
+function findRunningServer(port) {
+    return new Promise((resolve) => {
+        const req = http.get({ host: '127.0.0.1', port, path: '/api/info', timeout: 1500 }, (res) => {
+            let body = '';
+            res.on('data', (chunk) => {
+                body += chunk;
+            });
+            res.on('end', () => {
+                try {
+                    const info = JSON.parse(body);
+                    resolve(info && info.serverVersion ? info : null);
+                } catch (e) {
+                    resolve(null);
+                }
+            });
+        });
+        req.on('error', () => resolve(null));
+        req.on('timeout', () => {
+            req.destroy();
+            resolve(null);
+        });
+    });
+}
 
-if (require.main === module) {
+module.exports = { startServer, findRunningServer };
+
+async function main() {
     const args = parseArgs(process.argv.slice(2));
+    const running = await findRunningServer(args.port);
+    if (running) {
+        // one server per PC: reuse it (two servers would both drive the same phone)
+        const url = 'http://localhost:' + args.port;
+        console.log('Wi-Dex već radi na ' + url + ' (možda kao Windows aplikacija).');
+        if (args.open) {
+            openBrowser(url);
+        }
+        return;
+    }
     startServer({ port: args.port, open: args.open }).then((instance) => {
         let stopping = false;
         const stop = async () => {
@@ -399,4 +436,8 @@ if (require.main === module) {
         console.error('Greška: ' + e.message);
         process.exit(1);
     });
+}
+
+if (require.main === module) {
+    main();
 }

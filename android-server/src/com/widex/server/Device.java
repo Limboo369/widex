@@ -207,10 +207,20 @@ public final class Device {
         exec("cmd", "statusbar", "collapse");
     }
 
+    /** Rotation settings before the first rotateDevice() call, restored at the end: "auto" or a locked rotation. */
+    private static String savedRotation;
+
     /**
      * Rotate the device (lock the user rotation to the other orientation).
      */
-    public static void rotateDevice(int displayId, int currentRotation) {
+    public static synchronized void rotateDevice(int displayId, int currentRotation) {
+        if (savedRotation == null) {
+            String accelerometer = exec("settings", "get", "system", "accelerometer_rotation");
+            String userRotation = exec("settings", "get", "system", "user_rotation");
+            boolean auto = accelerometer != null && "1".equals(accelerometer.trim());
+            String locked = userRotation != null && userRotation.trim().matches("[0-3]") ? userRotation.trim() : "0";
+            savedRotation = auto ? "auto" : locked;
+        }
         int newRotation = (currentRotation & 1) ^ 1; // 0->1, 1->0, 2->1, 3->0
         String result = exec("cmd", "window", "user-rotation", "-d", String.valueOf(displayId), "lock", String.valueOf(newRotation));
         if (result == null) {
@@ -219,8 +229,19 @@ public final class Device {
         }
     }
 
-    public static void freeRotation(int displayId) {
-        exec("cmd", "window", "user-rotation", "-d", String.valueOf(displayId), "free");
+    /**
+     * Restore the rotation settings changed by rotateDevice() (called at the end of the session).
+     */
+    public static synchronized void restoreRotation(int displayId) {
+        if (savedRotation == null) {
+            return;
+        }
+        if ("auto".equals(savedRotation)) {
+            exec("cmd", "window", "user-rotation", "-d", String.valueOf(displayId), "free");
+        } else {
+            exec("cmd", "window", "user-rotation", "-d", String.valueOf(displayId), "lock", savedRotation);
+        }
+        savedRotation = null;
     }
 
     public static boolean startApp(String target, int displayId) {

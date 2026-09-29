@@ -40,6 +40,7 @@ public final class VideoStreamer {
     private volatile MediaCodec currentCodec;
     private volatile int bitRate;
     private volatile String encoderInUse = "";
+    private boolean lowLatencyKeys = true;
 
     public VideoStreamer(Capture capture, Options options, PacketWriter writer, ScreenState screenState) {
         this.capture = capture;
@@ -81,7 +82,7 @@ public final class VideoStreamer {
                 Size videoSize = capture.prepare();
                 MediaCodec codec = createCodec(mimeType, options.encoderName);
                 encoderInUse = codec.getName();
-                MediaFormat format = createFormat(mimeType, bitRate, options.maxFps, videoSize);
+                MediaFormat format = createFormat(mimeType, bitRate, options.maxFps, videoSize, lowLatencyKeys);
                 Surface surface = null;
                 boolean started = false;
                 try {
@@ -98,6 +99,12 @@ public final class VideoStreamer {
                         surface.release();
                     }
                     boolean encoderError = e instanceof IllegalStateException || e instanceof IllegalArgumentException;
+                    if (encoderError && lowLatencyKeys) {
+                        // some encoders may refuse the optional low latency settings: retry without them
+                        Ln.w("Retrying without the low latency encoder settings");
+                        lowLatencyKeys = false;
+                        continue;
+                    }
                     if (encoderError && capture.downsize()) {
                         continue;
                     }
@@ -210,19 +217,23 @@ public final class VideoStreamer {
         return MediaCodec.createEncoderByType(mimeType);
     }
 
-    private static MediaFormat createFormat(String mimeType, int bitRate, float maxFps, Size size) {
+    private static MediaFormat createFormat(String mimeType, int bitRate, float maxFps, Size size, boolean lowLatency) {
         MediaFormat format = MediaFormat.createVideoFormat(mimeType, size.width, size.height);
         format.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
         // must be present to configure the encoder, but does not impact the actual frame rate (variable)
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+        // limited range, like most decoders expect (correct colors in the browser)
+        format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL_SECONDS);
         format.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, REPEAT_FRAME_DELAY_US);
-        // realtime priority
-        format.setInteger(MediaFormat.KEY_PRIORITY, 0);
         if (maxFps > 0) {
             // MediaFormat.KEY_MAX_FPS_TO_ENCODER (hidden before Android 10)
             format.setFloat("max-fps-to-encoder", maxFps);
+        }
+        if (lowLatency) {
+            // realtime priority
+            format.setInteger(MediaFormat.KEY_PRIORITY, 0);
         }
         return format;
     }

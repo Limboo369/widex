@@ -20,6 +20,7 @@
     { "type": "button", "key": "KeyH", "x": 0.66, "y": 0.9, "mode": "tap", "label": "Lečenje" },
     { "type": "button", "key": "KeyQ", "x": 0.08, "y": 0.42, "mode": "hold", "label": "Viri L" },
     { "type": "button", "key": "KeyE", "x": 0.16, "y": 0.42, "mode": "hold", "label": "Viri D" },
+    { "type": "button", "key": "AltLeft", "x": 0.78, "y": 0.3, "mode": "hold", "label": "Slobodan pogled", "drag": true },
     { "type": "button", "key": "KeyM", "x": 0.93, "y": 0.08, "mode": "tap", "label": "Mapa" },
     { "type": "button", "key": "Tab", "x": 0.07, "y": 0.93, "mode": "tap", "label": "Ranac" }
   ]

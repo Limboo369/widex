@@ -21,7 +21,7 @@ const CHANNEL_VIDEO = 1;
 const CHANNEL_AUDIO = 2;
 
 // If the browser does not consume the stream fast enough, drop frames instead of accumulating latency
-const MAX_VIEWER_BUFFERED_BYTES = 3 * 1024 * 1024;
+const MAX_VIEWER_BUFFERED_BYTES = 1024 * 1024;
 const MAX_LOG_LINES = 300;
 
 function sleep(ms) {

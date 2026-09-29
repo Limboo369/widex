@@ -19,3 +19,6 @@ web-desktop/data/
 Thumbs.db
 .idea/
 .vscode/
+
+# Windows shortcuts (absolute paths)
+*.lnk

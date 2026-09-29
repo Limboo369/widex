@@ -22,5 +22,9 @@
   "license": "MIT",
   "dependencies": {
     "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^44.5.0"
   }
 }

@@ -5,6 +5,11 @@
 const PACKET_CONFIG = 1;
 const PACKET_KEY = 2;
 
+// If frames arrive this late compared to the best observed latency (backlog after a Wi-Fi stall),
+// skip to the next key frame instead of displaying the past.
+const MAX_LAG_MS = 250;
+const LAG_FRAMES_BEFORE_SKIP = 4;
+
 function hex2(value) {
     return value.toString(16).padStart(2, '0');
 }
@@ -130,6 +135,38 @@ export class VideoPlayer {
         this.frameCounter = 0;
         this.hardware = 'no-preference';
         this.supported = typeof window.VideoDecoder === 'function';
+        this.minOffset = null;
+        this.lateFrames = 0;
+        this.skipped = 0;
+        this.lastKeyframeRequest = 0;
+    }
+
+    requestKeyframe() {
+        const now = performance.now();
+        if (now - this.lastKeyframeRequest > 500 && this.callbacks.onRequestKeyframe) {
+            this.lastKeyframeRequest = now;
+            this.callbacks.onRequestKeyframe();
+        }
+    }
+
+    /**
+     * Track how late the frames arrive. The device timestamps and the local clock have an unknown constant offset:
+     * compare to the smallest offset seen (the best case), slowly adapted to follow the clock drift.
+     * @returns {boolean} true if the frame is too late (backlog)
+     */
+    isLate(pts) {
+        const offset = performance.now() - Number(pts) / 1000;
+        if (this.minOffset === null || offset < this.minOffset) {
+            this.minOffset = offset;
+        } else {
+            this.minOffset += (offset - this.minOffset) * 0.0005;
+        }
+        if (offset - this.minOffset > MAX_LAG_MS) {
+            this.lateFrames++;
+        } else {
+            this.lateFrames = 0;
+        }
+        return this.lateFrames >= LAG_FRAMES_BEFORE_SKIP;
     }
 
     /** New encoding session (start, rotation...). */
@@ -137,6 +174,8 @@ export class VideoPlayer {
         this.codec = codec;
         this.config = null;
         this.waitingKeyframe = true;
+        this.minOffset = null;
+        this.lateFrames = 0;
         if (width !== this.width || height !== this.height) {
             this.width = width;
             this.height = height;
@@ -205,8 +244,16 @@ export class VideoPlayer {
             return;
         }
         const isKey = type === PACKET_KEY;
+        if (this.isLate(pts)) {
+            // backlog: drop everything until a fresh key frame
+            this.waitingKeyframe = true;
+            this.skipped++;
+            this.requestKeyframe();
+            return;
+        }
         if (this.waitingKeyframe) {
             if (!isKey) {
+                this.requestKeyframe();
                 return;
             }
             this.waitingKeyframe = false;
@@ -216,9 +263,7 @@ export class VideoPlayer {
             this.decoder.reset();
             this.decoder.configure({ codec: this.codecString, optimizeForLatency: true, hardwareAcceleration: this.hardware });
             this.waitingKeyframe = true;
-            if (this.callbacks.onRequestKeyframe) {
-                this.callbacks.onRequestKeyframe();
-            }
+            this.requestKeyframe();
             return;
         }
         let chunkData = data;

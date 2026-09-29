@@ -7,9 +7,11 @@
  *   controls: [
  *     {type: "joystick", x, y, radius, up, down, left, right, sprint, sprintScale},
  *     {type: "camera", x, y, sensitivity, zone, releaseDelay},
- *     {type: "button", x, y, key, mode: "hold" | "tap", label}
+ *     {type: "button", x, y, key, mode: "hold" | "tap", label, drag}
  *   ]
  * }
+ * A button with "drag": true is moved by the mouse while it is held (e.g. the "free look" eye button of PUBG):
+ * during that time the mouse does not move the camera.
  * Keys use KeyboardEvent.code names, plus "Mouse0".."Mouse4" and "WheelUp"/"WheelDown".
  */
 
@@ -34,6 +36,7 @@ export class GameMapper {
         this.keyMap = new Map();
         this.pressedKeys = new Set();
         this.camera = null;
+        this.dragControl = null;
     }
 
     setProfile(profile) {
@@ -42,6 +45,7 @@ export class GameMapper {
         this.controls = [];
         this.keyMap = new Map();
         this.camera = null;
+        this.dragControl = null;
         if (!profile || !Array.isArray(profile.controls)) {
             return;
         }
@@ -175,15 +179,24 @@ export class GameMapper {
             return;
         }
         control.down = true;
-        this.touch('down', control, control.def.x * size.width, control.def.y * size.height);
+        control.x = control.def.x * size.width;
+        control.y = control.def.y * size.height;
+        this.touch('down', control, control.x, control.y);
         this.onPressedChange(control.index, true);
         if (control.def.mode === 'tap' || forceTap) {
             control.timers.push(setTimeout(() => this.releaseButton(control), TAP_DURATION_MS));
+        } else if (control.def.drag) {
+            // the mouse now moves this finger instead of the camera
+            this.releaseCamera();
+            this.dragControl = control;
         }
     }
 
     releaseButton(control) {
         this.clearTimers(control);
+        if (this.dragControl === control) {
+            this.dragControl = null;
+        }
         if (!control.down) {
             return;
         }
@@ -245,16 +258,30 @@ export class GameMapper {
     // ------------------------------------------------------------------ camera (mouse look)
 
     mouseMove(dx, dy) {
-        const camera = this.camera;
-        if (!camera || (!dx && !dy)) {
+        if (!dx && !dy) {
             return;
         }
         const size = this.getVideoSize();
         if (!size || !size.width) {
             return;
         }
-        const def = camera.def;
         const mouse = (this.profile && this.profile.mouse) || {};
+
+        const drag = this.dragControl;
+        if (drag && drag.down) {
+            // a "drag" button is held: move its finger (clamped to the screen, no re-centering)
+            const factor = (mouse.sensitivity || 1) * size.height / 1080;
+            drag.x = clamp(drag.x + dx * factor, 0, size.width - 1);
+            drag.y = clamp(drag.y + dy * factor * (mouse.invertY ? -1 : 1), 0, size.height - 1);
+            this.touch('move', drag, drag.x, drag.y);
+            return;
+        }
+
+        const camera = this.camera;
+        if (!camera) {
+            return;
+        }
+        const def = camera.def;
         const sensitivity = (mouse.sensitivity || 1) * (def.sensitivity || 1) * size.height / 1080;
         const anchorX = def.x * size.width;
         const anchorY = def.y * size.height;
@@ -301,6 +328,7 @@ export class GameMapper {
     /** Release every touch (focus lost, pointer lock lost, mode change...). */
     releaseAll() {
         this.pressedKeys.clear();
+        this.dragControl = null;
         for (const control of this.controls) {
             this.clearTimers(control);
             clearTimeout(control.idleTimer);
