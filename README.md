@@ -22,13 +22,13 @@ Pravljeno i testirano za **Pixel 7 Pro** sa najnovijim Androidom (testirano na A
 | | |
 |---|---|
 | Računar | Windows sa **Node.js** (imaš v22) i **adb** iz Android SDK (imaš preko Android Studio) |
-| Prikaz | **Windows aplikacija** (`Wi-Dex.lnk`) ili **Chrome/Edge** |
+| Prikaz | **Windows aplikacija** (prečica `Wi-Dex`) ili **Chrome/Edge** |
 | Telefon | Android 11+ (Pixel 7 Pro ✅). Zvuk traži Android 12+ |
 | Mreža | Telefon i PC na **istoj Wi-Fi mreži**, najbolje 5 GHz |
 
 ## Pokretanje
 
-- **`Wi-Dex.lnk`** (ili `Wi-Dex (aplikacija).bat`) otvara Windows aplikaciju. Ovo se preporučuje za igre, jer prečice browsera ne smetaju: Ctrl+W neće zatvoriti prozor dok čučiš i ideš napred.
+- **Prečica `Wi-Dex`** (tip „Shortcut“, sa plavom ikonicom) ili `Wi-Dex (aplikacija).bat` otvara Windows aplikaciju. Ovo se preporučuje za igre, jer prečice browsera ne smetaju: Ctrl+W neće zatvoriti prozor dok čučiš i ideš napred.
 - **`Wi-Dex (browser).bat`** otvara Wi-Dex u browseru na `http://localhost:3000`. Crni prozor (server) ostavi otvoren dok igraš.
 
 Posle prvog povezivanja Wi-Dex se sam poveže na telefon čim ga pokreneš (ako je na telefonu uključeno Bežično otklanjanje grešaka).
@@ -123,7 +123,7 @@ Server na računaru sluša samo na `localhost`, pa niko drugi sa mreže ne može
 
 ```
 Pex/
-├── Wi-Dex.lnk                  prečica do Windows aplikacije
+├── Wi-Dex (prečica)            otvara Windows aplikaciju (Wi-Dex.exe)
 ├── Wi-Dex (aplikacija).bat     pokreće Windows aplikaciju (prvi put je napravi)
 ├── Wi-Dex (browser).bat        pokreće server i otvara browser
 ├── android-server/             Java server za telefon
