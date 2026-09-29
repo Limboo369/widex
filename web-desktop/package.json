@@ -1,6 +1,6 @@
 {
   "name": "wi-dex",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Wi-Dex: igraj Android igre sa PC-a (mis + tastatura) preko Wi-Fi-ja. Pixel/Android telefon -> PC browser ili Windows aplikacija.",
   "main": "app/main.js",
   "scripts": {
@@ -24,6 +24,7 @@
   "author": "Darko",
   "license": "MIT",
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "ws": "^8.17.0"
   },
   "devDependencies": {
@@ -70,6 +71,13 @@
       "artifactName": "Wi-Dex-Setup-${version}.${ext}",
       "installerIcon": "app/icon.ico",
       "uninstallerIcon": "app/icon.ico"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Limboo369",
+        "repo": "widex"
+      }
+    ]
   }
 }

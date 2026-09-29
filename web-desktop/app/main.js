@@ -10,6 +10,7 @@ const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 
 // the data (profiles, settings) is shared with the browser version (%APPDATA%\Wi-Dex)
 const { startServer, findRunningServer } = require('../server');
+const { initAutoUpdate } = require('./updater');
 
 const PORT = 3000;
 
@@ -103,7 +104,10 @@ async function createWindow() {
     });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+    await createWindow();
+    initAutoUpdate(() => mainWindow);
+});
 
 app.on('window-all-closed', () => {
     app.quit();
