@@ -13,6 +13,9 @@ const { startServer, findRunningServer } = require('../server');
 
 const PORT = 3000;
 
+// Chromium's own files (cache, local storage...) in a subfolder, apart from the profiles and settings
+app.setPath('userData', path.join(app.getPath('appData'), 'Wi-Dex', 'electron'));
+
 // smoother video: never throttle the page, use the GPU for decoding
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');

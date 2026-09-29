@@ -161,6 +161,7 @@ npm run package-win
 - `npm run package-win` pravi `dist/Wi-Dex-win32-x64/Wi-Dex.exe`.
 
 Za testiranje bez telefona postoji emulator **WiDex_Test** (Android 17). Pokreće se iz Android Studio (*Device Manager*) i u Wi-Dex-u se pojavi kao 🖥️ uređaj.
+Zauzima oko 10.5 GB. Ako ti ne treba, obriši ga u Android Studio: *Device Manager* → WiDex_Test → *Delete*, pa *SDK Manager* → *SDK Platforms* → *Show Package Details* → Android 37.2 „Google Play Intel x86_64 … 16 KB Page Size“ → skini kvačicu → *Apply*.
 
 ## Stara verzija
 
