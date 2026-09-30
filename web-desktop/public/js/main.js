@@ -268,6 +268,7 @@ class App {
             width: Math.min(1280, bounds.width - 140),
             height: Math.min(800, bounds.height - 40),
             content: this.phoneView.element,
+            overlayHeader: true,
             onResize: () => this.phoneView && this.phoneView.layout(),
             onClose: () => {
                 if (this.phoneView && this.phoneView.gameMode) {
@@ -278,7 +279,12 @@ class App {
                 return true;
             },
         });
-        setTimeout(() => this.phoneView && this.phoneView.layout(), 0);
+        setTimeout(() => {
+            if (this.phoneView) {
+                this.phoneView.fitWindow();
+                this.phoneView.layout();
+            }
+        }, 0);
     }
 
     phoneTitle() {

@@ -33,7 +33,10 @@ export class PhoneView {
         this.build();
 
         this.player = new VideoPlayer(this.canvas, {
-            onSize: () => this.layout(),
+            onSize: () => {
+                this.fitWindow();
+                this.layout();
+            },
             onRequestKeyframe: () => this.app.send({ t: 'keyframe' }),
             onError: (message) => this.showMessage('⚠️ Problem sa videom', message),
             onFrame: () => {
@@ -177,6 +180,14 @@ export class PhoneView {
         const width = vw * scale;
         const height = vh * scale;
         return { left: r.left + (r.width - width) / 2, top: r.top + (r.height - height) / 2, width, height };
+    }
+
+    /** Portrait app = portrait window, landscape app = landscape window (no black bars at the sides). */
+    fitWindow() {
+        const win = this.app.windows.get('phone');
+        if (win && this.player.width && this.player.height) {
+            win.setAspect(this.player.width / this.player.height);
+        }
     }
 
     layout() {

@@ -2,6 +2,7 @@
  * Desktop window manager: draggable, resizable, maximizable windows with a taskbar.
  */
 import { h } from '../util/dom.js';
+import { icon } from './icons.js';
 
 const STORAGE_KEY = 'widex.windows';
 
@@ -89,12 +90,14 @@ export class WindowManager {
         height = Math.max(200, height);
 
         const titleText = h('span.window-title-text', options.title);
+        // macOS-style "traffic lights" on the left, title in the middle
         const header = h('div.window-header',
-            h('div.window-title', h('span', options.icon || '🗔'), titleText),
             h('div.window-controls',
-                h('button.win-btn.win-min', { title: 'Umanji' }, '—'),
-                h('button.win-btn.win-max', { title: 'Uvećaj' }, '▢'),
-                h('button.win-btn.win-close', { title: 'Zatvori' }, '✕')));
+                h('button.win-btn.win-close', { title: 'Zatvori', 'aria-label': 'Zatvori' }, icon('close')),
+                h('button.win-btn.win-min', { title: 'Umanji', 'aria-label': 'Umanji' }, icon('minus')),
+                h('button.win-btn.win-max', { title: 'Uvećaj', 'aria-label': 'Uvećaj' }, icon('fullscreen'))),
+            h('div.window-title', h('span', options.icon || '🗔'), titleText),
+            h('div.window-header-end'));
         const body = h('div.window-body');
         const resize = h('div.window-resize');
         const element = h('div.window.glass-panel', { id: 'win-' + options.id, role: 'dialog', 'aria-label': options.title }, header, body, resize);
@@ -104,6 +107,19 @@ export class WindowManager {
         element.style.height = height + 'px';
         if (options.content) {
             body.appendChild(options.content);
+        }
+        if (options.overlayHeader) {
+            // thin title bar over the content, shown only when the mouse reaches the top edge
+            element.classList.add('overlay-header');
+            element.addEventListener('pointermove', (e) => {
+                if (document.pointerLockElement) {
+                    return;
+                }
+                const top = element.getBoundingClientRect().top;
+                const near = e.clientY - top < 10 || (element.classList.contains('header-reveal') && header.contains(e.target));
+                element.classList.toggle('header-reveal', near);
+            });
+            element.addEventListener('pointerleave', () => element.classList.remove('header-reveal'));
         }
         this.container.appendChild(element);
 
@@ -119,6 +135,8 @@ export class WindowManager {
             prevRect: null,
             onClose: options.onClose,
             onResize: options.onResize,
+            aspect: 0,
+            setAspect: (ratio) => this.setAspect(options.id, ratio),
             setTitle: (title) => {
                 win.title = title;
                 titleText.textContent = title;
@@ -210,6 +228,13 @@ export class WindowManager {
             const initialHeight = element.offsetHeight;
             resize.setPointerCapture(e.pointerId);
             const move = (ev) => {
+                if (win.aspect) {
+                    // keep the shape of the content (phone screen): no black bars
+                    const width = Math.max(200, initialWidth + ev.clientX - startX);
+                    element.style.width = width + 'px';
+                    element.style.height = Math.max(200, width / win.aspect) + 'px';
+                    return;
+                }
                 element.style.width = Math.max(320, initialWidth + ev.clientX - startX) + 'px';
                 element.style.height = Math.max(200, initialHeight + ev.clientY - startY) + 'px';
             };
@@ -313,6 +338,41 @@ export class WindowManager {
             animation.cancel();
             if (win.dockAnimation === animation) win.dockAnimation = null;
         }
+    }
+
+    /**
+     * Fits the window to the shape of its content (width / height), keeping its height and center when possible.
+     */
+    setAspect(id, ratio) {
+        const win = this.windows.get(id);
+        if (!win || !(ratio > 0)) {
+            return;
+        }
+        win.aspect = ratio;
+        const el = win.element;
+        if (win.maximized) {
+            return;
+        }
+        const bounds = this.getBounds();
+        const maxWidth = bounds.width - 20;
+        const maxHeight = bounds.height - 20;
+        // big enough to use: most of the desktop height (a landscape app is then limited by the width)
+        let height = Math.min(Math.max(el.offsetHeight, maxHeight * 0.85), maxHeight);
+        let width = height * ratio;
+        if (width > maxWidth) {
+            width = maxWidth;
+            height = width / ratio;
+        }
+        const centerX = el.offsetLeft + el.offsetWidth / 2;
+        const left = Math.min(Math.max(0, centerX - width / 2), Math.max(0, bounds.width - width));
+        const top = Math.min(Math.max(0, el.offsetTop), Math.max(0, bounds.height - height));
+        el.classList.add('fitting');
+        clearTimeout(win.fitTimer);
+        win.fitTimer = setTimeout(() => {
+            el.classList.remove('fitting');
+            this.saveGeometry(win);
+        }, 300);
+        Object.assign(el.style, { left: left + 'px', top: top + 'px', width: width + 'px', height: height + 'px' });
     }
 
     toggleMaximize(id, save = true) {
