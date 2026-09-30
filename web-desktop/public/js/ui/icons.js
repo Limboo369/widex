@@ -36,7 +36,20 @@ const paths = {
     trash: '<path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/>',
 };
 
+const PNG_ICONS = new Set(['phone', 'game', 'keyboard', 'wifi', 'settings', 'help', 'grid', 'volume', 'muted', 'battery', 'light', 'refresh', 'rotate', 'link', 'monitor', 'plug', 'play', 'eye', 'fullscreen', 'back', 'home', 'square', 'bell', 'close', 'minus', 'check', 'warning', 'mouse', 'save', 'bolt', 'search', 'info', 'video', 'tools', 'trash']);
+
+/**
+ * PNG icons (img/icons, rendered from Phosphor Icons, MIT) used as a mask, so they take the text color
+ * of their button like the old vector icons did.
+ */
 export function icon(name) {
+    if (PNG_ICONS.has(name)) {
+        const el = document.createElement('span');
+        el.className = 'ui-icon ui-icon-png';
+        el.setAttribute('aria-hidden', 'true');
+        el.style.setProperty('--icon', 'url("/img/icons/' + name + '.png")');
+        return el;
+    }
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     for (const [key, value] of Object.entries({ viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.65', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false', class: 'ui-icon' })) svg.setAttribute(key, value);
     svg.innerHTML = paths[name] || paths.grid;
@@ -59,5 +72,16 @@ export function iconText(text) {
 }
 
 export function mountIcons(root = document) {
-    root.querySelectorAll('[data-icon]').forEach(el => el.replaceChildren(icon(el.dataset.icon)));
+    root.querySelectorAll('[data-icon]').forEach((el) => {
+        if (el.classList.contains('icon-img')) {
+            // desktop icons: full-color tiles
+            const img = document.createElement('img');
+            img.src = 'img/icons/desktop/' + el.dataset.icon + '.png';
+            img.alt = '';
+            img.draggable = false;
+            el.replaceChildren(img);
+            return;
+        }
+        el.replaceChildren(icon(el.dataset.icon));
+    });
 }

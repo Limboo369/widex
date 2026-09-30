@@ -249,3 +249,9 @@ select.input option { background: var(--panel-solid); color: var(--text); }
 .window.overlay-header.header-reveal .window-header { opacity: 1; transform: none; pointer-events: auto; }
 .window.overlay-header .window-body { flex: 1; }
 .window.fitting { transition: left .25s ease, top .25s ease, width .25s ease, height .25s ease; }
+
+/* ------------------------------------------------------------------ PNG icons */
+.ui-icon-png { background-color: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+#desktop .desktop-icon .icon-img { width: 64px; height: 64px; border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.desktop-icon .icon-img img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 8px 14px rgba(4, 10, 28, .35)); transition: transform .18s; }
+.desktop-icon:hover .icon-img img { transform: translateY(-2px) scale(1.04); }

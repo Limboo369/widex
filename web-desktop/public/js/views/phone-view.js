@@ -100,7 +100,7 @@ export class PhoneView {
             tool('●', '', 'Početni ekran (srednji klik)', () => this.pressKey(AKEY.HOME)),
             tool('▢', '', 'Nedavne aplikacije', () => this.pressKey(AKEY.APP_SWITCH)),
             tool('🔔', '', 'Obaveštenja', () => this.app.send({ t: 'notifications' })),
-            tool('⟳', '', 'Rotiraj telefon', () => this.app.send({ t: 'rotate' })),
+            tool(icon('rotate'), '', 'Rotiraj telefon', () => this.app.send({ t: 'rotate' })),
             this.btnScreen,
             this.btnAudio,
             h('div.sep'),
