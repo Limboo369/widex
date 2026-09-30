@@ -249,3 +249,20 @@ select.input option { background: var(--panel-solid); color: var(--text); }
 .window.overlay-header.header-reveal .window-header { opacity: 1; transform: none; pointer-events: auto; }
 .window.overlay-header .window-body { flex: 1; }
 .window.fitting { transition: left .25s ease, top .25s ease, width .25s ease, height .25s ease; }
+/* Wi-Dex menu (brand) and Wi-Dex over the whole screen (F11) */
+.brand-menu-btn { display: flex; align-items: center; gap: 10px; margin: 0 -8px; padding: 5px 8px; border: 0; border-radius: 9px; background: none; color: inherit; font: inherit; cursor: pointer; }
+.brand-menu-btn:hover, .brand-menu-btn[aria-expanded="true"] { background: rgba(214, 230, 255, .1); }
+.brand-menu { position: absolute; z-index: 6000; top: 52px; left: 20px; width: 300px; padding: 6px; border-radius: 14px; background: var(--glass-surface); display: flex; flex-direction: column; font-size: 13px; color: #e3ebf8; }
+.brand-menu.hidden { display: none; }
+.brand-menu button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 9px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.brand-menu button:hover { background: rgba(214, 230, 255, .1); }
+.brand-menu .ui-icon { width: 18px; height: 18px; }
+.brand-menu-label { flex: 1; }
+.brand-menu kbd, .brand-menu-note kbd { font: 11px/1 ui-monospace, monospace; padding: 3px 6px; border-radius: 5px; background: rgba(214, 230, 255, .12); color: #c0cde3; }
+.brand-menu-note { padding: 2px 10px 8px 38px; font-size: 11.5px; line-height: 1.6; color: #a5b6d0; }
+.brand-menu-note .ui-icon { width: 14px; height: 14px; }
+.brand-menu-sep { height: 1px; margin: 4px 6px; background: rgba(223, 235, 255, .12); }
+.topbar-btn { width: 30px; height: 30px; margin-left: 10px; margin-right: -8px; border: 1px solid transparent; border-radius: 8px; background: none; color: #c0cde3; cursor: pointer; }
+.topbar-btn:hover { background: rgba(214, 230, 255, .1); color: #fff; }
+.topbar-btn.active { background: rgba(110, 154, 243, .22); border-color: rgba(110, 154, 243, .5); color: #fff; }
+.topbar-btn .ui-icon { width: 19px; height: 19px; }

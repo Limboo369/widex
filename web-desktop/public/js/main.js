@@ -13,6 +13,7 @@ import { ConnectView } from './views/connect-view.js';
 import { SettingsView } from './views/settings-view.js';
 import { AppsMenu } from './views/apps-menu.js';
 import { createHelpView } from './views/help-view.js';
+import { AppFullscreen } from './ui/app-fullscreen.js';
 
 const PACKET_SESSION = 0;
 const CODEC_H265 = 0x68323635;
@@ -56,6 +57,7 @@ class App {
         };
         this.windows.onPhoneMinimizeRequest = () => this.phoneApps.minimize();
         this.installDesktop();
+        this.installBrandMenu();
         this.startClock();
 
         try {
@@ -66,6 +68,10 @@ class App {
         } catch (e) {
             toast(e.message, 'error', 10000);
             return;
+        }
+        if (this.config.startFullscreen && !new URLSearchParams(location.search).has('app')) {
+            // the Windows app goes fullscreen by itself (app/main.js); the browser waits for a click
+            this.fullscreen.enterOnFirstInput();
         }
         if (!this.info.adbVersion) {
             toast('adb nije pronađen. Instaliraj Android SDK Platform-Tools (ili Android Studio).', 'error', 15000);
@@ -164,6 +170,62 @@ class App {
         $('#tray-ping').addEventListener('click', () => this.openConnect());
         $('#tray-battery').addEventListener('click', () => this.openPhone());
         this.updateTray();
+    }
+
+    /** The Wi-Dex menu at the left of the top bar, and Wi-Dex over the whole screen (F11). */
+    installBrandMenu() {
+        this.fullscreen = new AppFullscreen();
+        const button = $('#brand-menu-btn');
+        const menu = $('#brand-menu');
+        const fullscreenButton = $('#btn-widex-fullscreen');
+        const setOpen = (open) => {
+            menu.classList.toggle('hidden', !open);
+            button.setAttribute('aria-expanded', String(open));
+        };
+        const update = (on) => {
+            const label = on ? 'Izađi iz celog ekrana' : 'Wi-Dex preko celog ekrana';
+            fullscreenButton.title = label + ' (F11)';
+            fullscreenButton.setAttribute('aria-label', label);
+            fullscreenButton.classList.toggle('active', on);
+            fullscreenButton.replaceChildren(icon(on ? 'widex-fullscreen-exit' : 'widex-fullscreen'));
+            $('#brand-fullscreen-label').textContent = label;
+        };
+        this.fullscreen.onChange = update;
+        button.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+        fullscreenButton.addEventListener('click', () => this.fullscreen.toggle());
+        menu.addEventListener('click', (event) => {
+            const item = event.target.closest('[data-brand]');
+            if (!item) {
+                return;
+            }
+            setOpen(false);
+            if (item.dataset.brand === 'fullscreen') {
+                this.fullscreen.toggle();
+            } else {
+                this.onDesktopAction(item.dataset.brand);
+            }
+        });
+        document.addEventListener('pointerdown', (event) => {
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                setOpen(false);
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !menu.classList.contains('hidden')) {
+                event.preventDefault();
+                event.stopPropagation();
+                setOpen(false);
+                button.focus();
+            }
+        });
+    }
+
+    async setStartFullscreen(on) {
+        try {
+            this.config = await api.saveConfig({ startFullscreen: !!on });
+        } catch (e) {
+            toast('Ne mogu da sačuvam podešavanja: ' + e.message, 'error');
+        }
     }
 
     onDesktopAction(action) {

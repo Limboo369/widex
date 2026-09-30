@@ -53,6 +53,9 @@ export class SettingsView {
         this.mode.addEventListener('change', updateMode);
         updateMode();
 
+        this.startFullscreen = checkbox(this.app.config.startFullscreen);
+        this.startFullscreen.addEventListener('change', () => this.app.setStartFullscreen(this.startFullscreen.checked));
+
         this.logs = h('div.logs.hidden');
         this.infoEl = h('div.small.muted');
 
@@ -85,6 +88,10 @@ export class SettingsView {
                     desktopRow),
                 h('p.small.muted', 'Poseban desktop pravi dodatni (virtuelni) ekran na telefonu; aplikacije iz menija Start se otvaraju na njemu. ',
                     'Na Pixel-u najbolje radi uz Opcije za programere → „Omogući prozore promenljive veličine“ i „Nametni režim računara“.')),
+            h('div.section',
+                h('h3', '🖥️ Prikaz'),
+                h('label.check', this.startFullscreen, h('span.check-text', 'Pokreni u punom ekranu',
+                    h('small', 'Wi-Dex se otvara preko celog ekrana (F11 za izlaz). Ceo ekran jedne aplikacije je posebno: F10.')))),
             h('div.row',
                 h('button.btn.btn-primary.btn-lg', { onclick: () => this.apply(true) }, 'Sačuvaj i ponovo poveži'),
                 h('button.btn.btn-lg', { onclick: () => this.apply(false) }, 'Samo sačuvaj')),

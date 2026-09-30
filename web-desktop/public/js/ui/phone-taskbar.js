@@ -164,7 +164,7 @@ export class PhoneTaskbar {
             if (switching && phone && !phone.minimized && this.app.windows.animateDock) {
                 collapsed = await this.app.windows.animateDock('phone', this.targetFor(this.app.foregroundPackage()));
                 // Reduced motion and fullscreen can skip the effect, but the old stream must still be hidden.
-                if (!collapsed && this.app.windows.get('phone') === phone && !document.fullscreenElement) {
+                if (!collapsed && this.app.windows.get('phone') === phone && !(document.fullscreenElement && document.fullscreenElement !== document.documentElement)) {
                     this.app.windows.minimize('phone');
                     collapsed = true;
                 }

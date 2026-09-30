@@ -71,9 +71,18 @@ async function createWindow() {
             spellcheck: false,
         },
     });
-    mainWindow.once('ready-to-show', () => {
+    mainWindow.once('ready-to-show', async () => {
         mainWindow.maximize();
         mainWindow.show();
+        // "Pokreni u punom ekranu": the same fullscreen as F11 in the page (the page needs a user gesture for it)
+        try {
+            const config = await (await fetch(baseUrl + '/api/config')).json();
+            if (config.startFullscreen && mainWindow) {
+                mainWindow.webContents.executeJavaScript('document.documentElement.requestFullscreen()', true).catch(() => {});
+            }
+        } catch (e) {
+            // start in a window
+        }
     });
 
     // external links in the default browser

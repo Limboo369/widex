@@ -302,7 +302,7 @@ export class WindowManager {
     /** Genie-inspired funnel to/from the dock. The live canvas and its geometry stay intact. */
     async animateDock(id, target, opening = false) {
         const win = this.get(id);
-        if (!win || win.minimized || !target || document.fullscreenElement
+        if (!win || win.minimized || !target || (document.fullscreenElement && document.fullscreenElement !== document.documentElement)
             || window.matchMedia('(prefers-reduced-motion: reduce)').matches
             || typeof win.element.animate !== 'function') return false;
         this.cancelDockAnimation(id);

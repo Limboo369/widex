@@ -92,7 +92,7 @@ export class PhoneView {
         this.btnMarkers = tool('👁', '', 'Prikaži/sakrij oznake tastera preko igre', () => this.toggleMarkers());
         this.btnScreen = tool('💡', '', 'Ugasi/upali ekran telefona (igra nastavlja da radi)', () => this.toggleScreen());
         this.btnAudio = tool('🔊', '', 'Zvuk sa telefona', () => this.app.toggleMute());
-        this.btnFullscreen = tool('⛶', '', 'Ceo ekran (F10)', () => this.toggleFullscreen());
+        this.btnFullscreen = tool('⤢', '', 'Ceo ekran aplikacije: samo ekran telefona (F10)', () => this.toggleFullscreen());
         this.statsEl = h('div.stream-stats');
 
         this.toolbar = h('div.phone-toolbar',
@@ -307,7 +307,8 @@ export class PhoneView {
     }
 
     toggleFullscreen() {
-        if (document.fullscreenElement) {
+        // only this window; Wi-Dex over the whole screen (F11) stays underneath if it is on
+        if (document.fullscreenElement === this.element) {
             document.exitFullscreen().catch(() => {});
             return;
         }
@@ -317,6 +318,7 @@ export class PhoneView {
                 navigator.keyboard.lock().catch(() => {});
             }
             this.stage.focus();
+            toast('Ceo ekran aplikacije. F10 za povratak u Wi-Dex.', 'info', 3000);
         }).catch((e) => toast('Ceo ekran nije dozvoljen: ' + e.message, 'warn'));
     }
 
@@ -647,7 +649,7 @@ export class PhoneView {
             this.btnFullscreen.classList.toggle('active', fullscreen);
             (this.topbar || this.toolbar).classList.remove('reveal');
             this.placeToolbar();
-            if (!fullscreen && navigator.keyboard && navigator.keyboard.unlock) {
+            if (!document.fullscreenElement && navigator.keyboard && navigator.keyboard.unlock) {
                 navigator.keyboard.unlock();
             }
             setTimeout(() => this.layout(), 50);
@@ -736,7 +738,7 @@ export class PhoneView {
                 this.openEditor();
                 return;
             }
-            if (code === 'F10' || code === 'F11') {
+            if (code === 'F10') {
                 e.preventDefault();
                 this.toggleFullscreen();
                 return;
