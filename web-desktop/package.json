@@ -1,7 +1,7 @@
 {
   "name": "beam",
-  "version": "2.0.1",
-  "description": "Beam: play Android games on your PC (mouse + keyboard) over Wi-Fi. Pixel/Android phone -> PC browser or Windows app.",
+  "version": "2.0.2",
+  "description": "Beam: play Android games on your computer (mouse + keyboard) over Wi-Fi. Pixel/Android phone -> browser, Windows app or Mac app.",
   "main": "app/main.js",
   "scripts": {
     "start": "node server.js --open",
@@ -68,9 +68,22 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Beam",
-      "artifactName": "Beam-Setup-${version}.${ext}",
+      "artifactName": "Beam-${version}-Windows-Setup.${ext}",
       "installerIcon": "app/icon.ico",
       "uninstallerIcon": "app/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "app/icon-mac.png",
+      "category": "public.app-category.games",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "artifactName": "Beam-${version}-macOS-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "Beam ${version}",
+      "writeUpdateInfo": false
     },
     "publish": [
       {

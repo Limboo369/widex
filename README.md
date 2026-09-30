@@ -1,10 +1,24 @@
-# Beam: Android games on your PC (mouse + keyboard, over Wi-Fi)
+# Beam: Android games on your computer (mouse + keyboard, over Wi-Fi)
 
-Beam shows your phone screen on your PC, in a browser or as a Windows app. You can play Android games with a mouse and keyboard: **WASD** to move, the **mouse** for the camera, **click** to shoot. Everything goes over Wi-Fi, and you do not need to install any app on the phone.
+Beam shows your phone screen on your Windows PC or Mac, in a browser or as a desktop app. You can play Android games with a mouse and keyboard: **WASD** to move, the **mouse** for the camera, **click** to shoot. Everything goes over Wi-Fi, and you do not need to install any app on the phone.
 
 Built and tested for the **Pixel 7 Pro** with the latest Android (tested on an Android 17 emulator, API 37).
 
 ---
+
+## Downloads
+
+Get the newest version from the **[latest Release](https://github.com/Limboo369/widex/releases/latest)**:
+
+| Your computer | File |
+|---|---|
+| **Windows** 10/11 (64-bit) | `Beam-<version>-Windows-Setup.exe` |
+| **Mac** with Apple Silicon (M1, M2, M3, M4...) | `Beam-<version>-macOS-AppleSilicon.dmg` |
+| **Mac** with an Intel processor | `Beam-<version>-macOS-Intel.dmg` |
+
+On a Mac, open the .dmg and drag Beam into Applications. **Opening it the first time:** the app is not signed by Apple, so right-click Beam and choose **Open** (on macOS 15 or later: System Settings > Privacy & Security > **Open Anyway**).
+
+The installed app includes everything it needs (adb too). Node.js is only needed to run Beam from the source code.
 
 ## What you get
 
@@ -21,15 +35,15 @@ Built and tested for the **Pixel 7 Pro** with the latest Android (tested on an A
 
 | | |
 |---|---|
-| PC | Windows with **Node.js** (v22) and **adb** from the Android SDK (included with Android Studio) |
-| Display | The **Windows app** (the `Beam` shortcut) or **Chrome/Edge** |
+| Computer | **Windows** 10/11 or **macOS** 12+: the installer from [Downloads](#downloads) is enough. From source: **Node.js** (v22) and **adb** from the Android SDK |
+| Display | The **Beam app** (Windows or Mac) or **Chrome/Edge** |
 | Phone | Android 11+ (Pixel 7 Pro ✅). Sound needs Android 12+ |
-| Network | Phone and PC on the **same Wi-Fi network**, ideally 5 GHz |
+| Network | Phone and computer on the **same Wi-Fi network**, ideally 5 GHz |
 
 ## Starting
 
-- **The `Beam` shortcut** or `Beam (app).bat` opens the Windows app. This is recommended for games, because browser shortcuts do not get in the way: Ctrl+W will not close the window while you crouch and move forward.
-- **`Beam (browser).bat`** opens Beam in the browser at `http://localhost:3000`. Leave the black window (the server) open while you play.
+- **The `Beam` app** (Start menu / desktop shortcut on Windows, Applications on Mac) is recommended for games. Browser shortcuts do not get in the way there: Ctrl+W will not close the window while you crouch and move forward.
+- From the source code: `Beam (app).bat` / `Beam (app).command` (Mac) starts the app, and `Beam (browser).bat` / `Beam (browser).command` opens Beam in the browser at `http://localhost:3000`. Leave the server window open while you play.
 
 After the first connection, Beam connects to the phone by itself as soon as you start it (if Wireless debugging is on on the phone).
 
@@ -78,7 +92,7 @@ The positions in the template are approximate. Always line them up with your gam
 
 - **5 GHz** Wi-Fi (or 6 GHz), the phone close to the router, the PC on a cable if possible.
 - *Settings*: **Fast** quality (1280, 8 Mb/s) if the picture lags. **Balanced** (1920, 12 Mb/s) is the default.
-- For games, use the **Windows app** and fullscreen (`F10`).
+- For games, use the **Beam app** and fullscreen (`F10`).
 - Turn on **Turn the phone screen off**: the phone stays cooler and the game runs the same.
 - The ping (📶 bottom right) shows the latency to the phone. Over Wi-Fi it is usually 3–15 ms.
 
@@ -88,7 +102,7 @@ The positions in the template are approximate. Always line them up with your gam
 |---|---|
 | The phone does not show up | Same Wi-Fi network? Turn *Wireless debugging* off and on, or enter the IP and port manually. |
 | "Waiting for permission" | On the phone, accept "Allow USB debugging?" (check *Always allow*). |
-| No picture in the browser | Use Chrome/Edge at `http://localhost:3000` (not the IP address), or the Windows app. |
+| No picture in the browser | Use Chrome/Edge at `http://localhost:3000` (not the IP address), or the Beam app. |
 | No sound | Click anywhere on the page (the browser needs a click before sound). Sound needs Android 12+. |
 | The picture stutters or lags | *Settings*: lower the bitrate or resolution. Check the Wi-Fi signal. |
 | The controls miss | Press `F9` while the game is open, then line up the markers with the buttons. |
@@ -101,7 +115,7 @@ The positions in the template are approximate. Always line them up with your gam
 ## How it works (technical)
 
 ```
- Phone (Android)                            PC (Windows)
+ Phone (Android)                            PC (Windows / Mac)
  ┌───────────────────────────────┐   adb    ┌──────────────────────────┐  WebSocket  ┌─────────────────────────┐
  │ beam-server.jar (app_process  │◄────────►│ web-desktop/server.js    │◄───────────►│ Browser / Beam.exe      │
  │ with "shell" permissions):    │  Wi-Fi   │ (Node.js)                │  localhost  │ - WebCodecs (H.264)     │
@@ -124,7 +138,9 @@ The PC server listens only on `localhost`, so nobody else on the network can con
 ```
 Pex/
 ├── Beam (app).bat              starts the Windows app (builds it the first time)
+├── Beam (app).command          the same on a Mac
 ├── Beam (browser).bat          starts the server and opens the browser
+├── Beam (browser).command      the same on a Mac
 ├── android-server/             Java server for the phone
 │   ├── build.js                build without Gradle (javac + d8 from the Android SDK)
 │   └── src/com/beam/server/    video, sound, control, helpers
@@ -134,8 +150,8 @@ Pex/
     ├── public/                 web interface (desktop, video, sound, game mode, editor)
     ├── presets/                key mapping templates (shooter, MOBA, basic)
     ├── bin/beam-server.jar     built server (sent to the phone)
-    ├── app/                    Windows app (Electron)
-    ├── scripts/                packaging into an .exe and the installer, icon
+    ├── app/                    desktop app for Windows and Mac (Electron)
+    ├── scripts/                packaging and the installers (Windows, Mac), icon
     └── dist/                   Beam.exe and the installer (`npm run package-win`, `npm run installer`)
 ```
 
@@ -169,8 +185,9 @@ npm run package-win
 - `android-server/build.js` rebuilds `web-desktop/bin/beam-server.jar`. It needs the JDK from Android Studio and the Android SDK.
 - `npm run server` starts the server without opening the browser, and `npm run app` starts Electron without packaging.
 - `npm run package-win` builds `dist/Beam-win32-x64/Beam.exe`.
-- `npm run installer` builds the installer `dist/installer/Beam-Setup-<version>.exe` with adb included (taken from the Android SDK platform-tools), so another PC needs neither Node.js nor the Android SDK.
-- The app name is in `web-desktop/lib/brand.js` (server and Windows app), `web-desktop/public/js/brand.js` (web page) and the `build` section of `web-desktop/package.json` (installer).
+- `npm run installer` builds the installer for the OS it runs on, with adb included (from the Android SDK platform-tools, or `PLATFORM_TOOLS_DIR`), so another computer needs neither Node.js nor the Android SDK: `dist/installer/Beam-<version>-Windows-Setup.exe` on Windows, `Beam-<version>-macOS-AppleSilicon.dmg` and `-Intel.dmg` on a Mac.
+- Releases: push a tag like `v2.0.2` and GitHub Actions (`.github/workflows/release.yml`) builds the Windows and Mac installers and publishes them in one Release, with the notes from `.github/release-notes/<tag>.md`.
+- The app name is in `web-desktop/lib/brand.js` (server and desktop app), `web-desktop/public/js/brand.js` (web page) and the `build` section of `web-desktop/package.json` (installer).
 
 For testing without a phone there is an Android 17 emulator. Start it from Android Studio (*Device Manager*) and it shows up in Beam as a 🖥️ device.
 It takes about 10.5 GB. If you do not need it, delete it in Android Studio: *Device Manager* → the emulator → *Delete*, then *SDK Manager* → *SDK Platforms* → *Show Package Details* → Android 37.2 "Google Play Intel x86_64 … 16 KB Page Size" → uncheck it → *Apply*.
