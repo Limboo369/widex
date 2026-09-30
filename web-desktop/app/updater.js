@@ -35,9 +35,7 @@ async function notifyMacUpdate(getWindow) {
             title: APP_NAME,
             message: APP_NAME + ' ' + String(release.tag_name).replace(/^v/, '') + ' is available',
             detail: 'Current version: ' + current
-                + '
-
-Download the new .dmg from the Release page and drag ' + APP_NAME + ' into Applications again.',
+                + '\n\nDownload the new .dmg from the Release page and drag ' + APP_NAME + ' into Applications again.',
             buttons: ['Open download page', 'Later'],
             defaultId: 0,
             cancelId: 1,
