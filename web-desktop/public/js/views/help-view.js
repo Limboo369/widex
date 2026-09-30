@@ -8,8 +8,12 @@ function row(keys, text) {
     return h('tr', h('td', keys), h('td', text));
 }
 
-export function createHelpView() {
+export function createHelpView(openSetup) {
     return h('div.view',
+        h('div.section',
+            h('div.section-title', h('h3', '📱 Setting up a phone'),
+                h('button.btn.btn-sm.btn-primary', { onclick: openSetup }, 'Open setup guide')),
+            h('p.small', 'Step-by-step guide: Developer options, USB or wireless debugging, the permission prompt and drivers, with a live connection check.')),
         h('div.section',
             h('h3', '🎮 How to play'),
             h('ol.steps',

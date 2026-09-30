@@ -13,6 +13,7 @@ import { ConnectView } from './views/connect-view.js';
 import { SettingsView } from './views/settings-view.js';
 import { AppsMenu } from './views/apps-menu.js';
 import { createHelpView } from './views/help-view.js';
+import { SetupView, isSetupDone } from './views/setup-view.js';
 import { AppFullscreen } from './ui/app-fullscreen.js';
 import { APP_NAME } from './brand.js';
 
@@ -95,6 +96,9 @@ class App {
         }
         if (!resumed) {
             this.openConnect();
+            if (!isSetupDone() || new URLSearchParams(location.search).has('setup')) {
+                this.openSetup();
+            }
             this.autoStart();
         }
         setInterval(() => this.sendPing(), 2000);
@@ -254,6 +258,9 @@ class App {
             case 'help':
                 this.openHelp();
                 break;
+            case 'setup':
+                this.openSetup();
+                break;
             default:
                 break;
         }
@@ -393,7 +400,28 @@ class App {
             this.windows.focus('help');
             return;
         }
-        this.windows.open({ id: 'help', title: 'Help', icon: '❔', width: 640, height: 700, content: createHelpView() });
+        this.windows.open({ id: 'help', title: 'Help', icon: '❔', width: 640, height: 700, content: createHelpView(() => this.openSetup()) });
+    }
+
+    openSetup() {
+        if (this.windows.has('setup')) {
+            this.windows.focus('setup');
+            return;
+        }
+        const view = new SetupView(this);
+        this.windows.open({
+            id: 'setup',
+            title: 'Set up your phone',
+            icon: '📱',
+            width: 680,
+            height: 640,
+            content: view.element,
+            onClose: () => {
+                view.stopPolling();
+                return true;
+            },
+        });
+        view.startPolling();
     }
 
     // ------------------------------------------------------------------ session

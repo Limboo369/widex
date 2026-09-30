@@ -150,8 +150,9 @@ export class ConnectView {
         this.deviceList.textContent = '';
         const usable = this.devices.filter((d) => d.state === 'device');
         if (!this.devices.length) {
-            this.deviceNotice.replaceChildren(h('div.notice.info',
-                'No phone is connected. Turn on "Wireless debugging" on the phone (steps below).'));
+            this.deviceNotice.replaceChildren(h('div.notice.info.notice-action',
+                h('span', 'No phone is connected. Plug it in with USB debugging on, or use Wireless debugging (steps below).'),
+                h('button.btn.btn-sm', { onclick: () => this.app.openSetup() }, 'Setup guide')));
         } else if (this.devices.some((d) => d.state === 'unauthorized')) {
             this.deviceNotice.replaceChildren(h('div.notice.warn',
                 'On the phone, accept "Allow USB debugging?" (check "Always allow from this computer").'));
