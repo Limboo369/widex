@@ -183,7 +183,7 @@ class App {
             button.setAttribute('aria-expanded', String(open));
         };
         const update = (on) => {
-            const label = on ? 'Izađi iz celog ekrana' : 'Wi-Dex preko celog ekrana';
+            const label = on ? 'Exit fullscreen' : 'Wi-Dex fullscreen';
             fullscreenButton.title = label + ' (F11)';
             fullscreenButton.setAttribute('aria-label', label);
             fullscreenButton.classList.toggle('active', on);
@@ -224,7 +224,7 @@ class App {
         try {
             this.config = await api.saveConfig({ startFullscreen: !!on });
         } catch (e) {
-            toast('Ne mogu da sačuvam podešavanja: ' + e.message, 'error');
+            toast('Could not save the settings: ' + e.message, 'error');
         }
     }
 

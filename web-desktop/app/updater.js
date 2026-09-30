@@ -40,10 +40,10 @@ function initAutoUpdate(getWindow) {
         const { response } = await dialog.showMessageBox(getWindow(), {
             type: 'info',
             title: 'Wi-Dex',
-            message: 'Dostupna je nova verzija Wi-Dex ' + info.version,
-            detail: 'Trenutna verzija: ' + autoUpdater.currentVersion.version
-                + '\n\nPreuzimanje ide u pozadini, a igru možeš da nastaviš.',
-            buttons: ['Preuzmi', 'Kasnije'],
+            message: 'Wi-Dex ' + info.version + ' is available',
+            detail: 'Current version: ' + autoUpdater.currentVersion.version
+                + '\n\nIt downloads in the background, so you can keep playing.',
+            buttons: ['Download', 'Later'],
             defaultId: 0,
             cancelId: 1,
             noLink: true,
@@ -68,9 +68,9 @@ function initAutoUpdate(getWindow) {
         const { response } = await dialog.showMessageBox(win, {
             type: 'info',
             title: 'Wi-Dex',
-            message: 'Wi-Dex ' + info.version + ' je spreman za instalaciju',
-            detail: 'Restartuj sada, ili će se instalirati kada sledeći put zatvoriš Wi-Dex.',
-            buttons: ['Restartuj sada', 'Kasnije'],
+            message: 'Wi-Dex ' + info.version + ' is ready to install',
+            detail: 'Restart now, or it will be installed the next time you close Wi-Dex.',
+            buttons: ['Restart now', 'Later'],
             defaultId: 0,
             cancelId: 1,
             noLink: true,

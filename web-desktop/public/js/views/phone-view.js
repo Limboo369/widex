@@ -92,7 +92,7 @@ export class PhoneView {
         this.btnMarkers = tool('👁', '', 'Prikaži/sakrij oznake tastera preko igre', () => this.toggleMarkers());
         this.btnScreen = tool('💡', '', 'Ugasi/upali ekran telefona (igra nastavlja da radi)', () => this.toggleScreen());
         this.btnAudio = tool('🔊', '', 'Zvuk sa telefona', () => this.app.toggleMute());
-        this.btnFullscreen = tool('⤢', '', 'Ceo ekran aplikacije: samo ekran telefona (F10)', () => this.toggleFullscreen());
+        this.btnFullscreen = tool('⤢', '', 'App fullscreen: phone screen only (F10)', () => this.toggleFullscreen());
         this.statsEl = h('div.stream-stats');
 
         this.toolbar = h('div.phone-toolbar',
@@ -318,7 +318,7 @@ export class PhoneView {
                 navigator.keyboard.lock().catch(() => {});
             }
             this.stage.focus();
-            toast('Ceo ekran aplikacije. F10 za povratak u Wi-Dex.', 'info', 3000);
+            toast('App fullscreen. Press F10 to return to Wi-Dex.', 'info', 3000);
         }).catch((e) => toast('Ceo ekran nije dozvoljen: ' + e.message, 'warn'));
     }
 

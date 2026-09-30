@@ -26,7 +26,7 @@ export class AppFullscreen {
                 }
                 if (!this.active) {
                     this.active = true;
-                    toast('Wi-Dex je preko celog ekrana. F11 za izlaz.', 'info', 3000);
+                    toast('Wi-Dex is fullscreen. Press F11 to exit.', 'info', 3000);
                 }
             } else if (!document.fullscreenElement) {
                 this.active = false;
@@ -61,7 +61,7 @@ export class AppFullscreen {
         try {
             await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
         } catch (e) {
-            toast('Ceo ekran nije dozvoljen: ' + e.message, 'warn');
+            toast('Fullscreen is not allowed: ' + e.message, 'warn');
         }
     }
 
