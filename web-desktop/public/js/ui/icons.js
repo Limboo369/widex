@@ -18,11 +18,6 @@ const paths = {
     play: '<path d="m8 4 12 8-12 8Z"/>',
     eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
     fullscreen: '<path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/>',
-    // an Android app window over the whole screen: a phone inside the corners
-    'app-fullscreen': '<rect x="9" y="6.5" width="6" height="11" rx="1.6"/><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/>',
-    // Wi-Dex over the whole screen: a monitor with corners pointing out / in
-    'widex-fullscreen': '<rect x="2" y="3" width="20" height="14" rx="3"/><path d="M12 17v4M8 21h8M6.5 9.5v-3h3M17.5 9.5v-3h-3M6.5 10.5v3h3M17.5 10.5v3h-3"/>',
-    'widex-fullscreen-exit': '<rect x="2" y="3" width="20" height="14" rx="3"/><path d="M12 17v4M8 21h8M6.5 8.5h3v-2M17.5 8.5h-3v-2M6.5 11.5h3v2M17.5 11.5h-3v2"/>',
     back: '<path d="m15 5-7 7 7 7"/>',
     home: '<circle cx="12" cy="12" r="7"/>',
     square: '<rect x="5" y="5" width="14" height="14" rx="2"/>',
@@ -41,7 +36,7 @@ const paths = {
     trash: '<path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/>',
 };
 
-const PNG_ICONS = new Set(['phone', 'game', 'keyboard', 'wifi', 'settings', 'help', 'grid', 'volume', 'muted', 'battery', 'light', 'refresh', 'rotate', 'link', 'monitor', 'plug', 'play', 'eye', 'fullscreen', 'back', 'home', 'square', 'bell', 'close', 'minus', 'check', 'warning', 'mouse', 'save', 'bolt', 'search', 'info', 'video', 'tools', 'trash']);
+const PNG_ICONS = new Set(['phone', 'game', 'keyboard', 'wifi', 'settings', 'help', 'grid', 'volume', 'muted', 'battery', 'light', 'refresh', 'rotate', 'link', 'monitor', 'plug', 'play', 'eye', 'fullscreen', 'back', 'home', 'square', 'bell', 'close', 'minus', 'check', 'warning', 'mouse', 'save', 'bolt', 'search', 'info', 'video', 'tools', 'trash', 'app-fullscreen', 'widex-fullscreen', 'widex-fullscreen-exit']);
 
 /**
  * PNG icons (img/icons, rendered from Phosphor Icons, MIT) used as a mask, so they take the text color

@@ -4,7 +4,8 @@ const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const OUT = process.env.OUT || path.join(__dirname, '..', 'public', 'img', 'icons');
-const P = path.join(path.dirname(require.resolve('@phosphor-icons/core/package.json')), 'assets');
+// the package does not export package.json, so find it through node_modules
+const P = path.join(__dirname, '..', 'node_modules', '@phosphor-icons', 'core', 'assets');
 const svg = (name, weight = 'fill') => fs.readFileSync(path.join(P, weight, name + (weight === 'regular' ? '' : '-' + weight) + '.svg'), 'utf8');
 
 const glyphs = {
@@ -15,6 +16,14 @@ const glyphs = {
   square: ['square'], bell: ['bell'], close: ['x', 'bold'], minus: ['minus', 'bold'], check: ['check', 'bold'],
   warning: ['warning'], mouse: ['mouse'], save: ['floppy-disk'], bolt: ['lightning'], search: ['magnifying-glass', 'bold'],
   info: ['info'], video: ['film-strip'], tools: ['wrench'], trash: ['trash'],
+};
+// two glyphs in one icon: [outer, weight], [inner, weight, size, center x, center y] (fractions of the icon)
+const composed = {
+  // an Android app over the whole screen: a phone inside the fullscreen corners
+  'app-fullscreen': [['corners-out', 'bold'], ['device-mobile', 'fill', .5, .5, .5]],
+  // Wi-Dex over the whole screen: arrows out / in on a monitor
+  'widex-fullscreen': [['monitor', 'bold'], ['arrows-out', 'bold', .42, .5, .42]],
+  'widex-fullscreen-exit': [['monitor', 'bold'], ['arrows-in', 'bold', .42, .5, .42]],
 };
 // desktop tiles: [glyph, gradient top, gradient bottom]
 const tiles = {
@@ -27,6 +36,9 @@ const page = `<canvas id=c></canvas><script>
 async function img(text){ const i=new Image(); i.src='data:image/svg+xml;base64,'+btoa(text); await i.decode(); return i; }
 window.glyph = async (text, size) => { const c=document.getElementById('c'); c.width=c.height=size; const x=c.getContext('2d');
   x.clearRect(0,0,size,size); const i=await img(text.replace('fill="currentColor"','fill="#fff"')); x.drawImage(i,0,0,size,size); return c.toDataURL('image/png'); };
+window.compose = async (outer, inner, s, cx, cy, size) => { const c=document.getElementById('c'); c.width=c.height=size; const x=c.getContext('2d');
+  x.clearRect(0,0,size,size); const white=(t)=>t.replace('fill="currentColor"','fill="#fff"');
+  x.drawImage(await img(white(outer)),0,0,size,size); const w=s*size; x.drawImage(await img(white(inner)),cx*size-w/2,cy*size-w/2,w,w); return c.toDataURL('image/png'); };
 window.tile = async (text, top, bottom, size) => { const c=document.getElementById('c'); c.width=c.height=size; const x=c.getContext('2d'); x.clearRect(0,0,size,size);
   const pad=size*.04, s=size-2*pad, r=s*.235;
   const rr=()=>{ x.beginPath(); x.roundRect(pad,pad,s,s,r); };
@@ -49,6 +61,9 @@ app.whenReady().then(async () => {
   fs.mkdirSync(path.join(OUT, 'desktop'), { recursive: true });
   for (const [name, [src, weight]] of Object.entries(glyphs)) {
     save(name + '.png', await win.webContents.executeJavaScript(`glyph(${JSON.stringify(svg(src, weight))}, 72)`));
+  }
+  for (const [name, [[outer, ow], [inner, iw, s, cx, cy]]] of Object.entries(composed)) {
+    save(name + '.png', await win.webContents.executeJavaScript(`compose(${JSON.stringify(svg(outer, ow))}, ${JSON.stringify(svg(inner, iw))}, ${s}, ${cx}, ${cy}, 72)`));
   }
   for (const [name, [src, top, bottom, weight]] of Object.entries(tiles)) {
     save('desktop/' + name + '.png', await win.webContents.executeJavaScript(`tile(${JSON.stringify(svg(src, weight))}, '${top}', '${bottom}', 256)`));
