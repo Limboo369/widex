@@ -3,6 +3,7 @@
  */
 import { h, toast } from '../util/dom.js';
 import { api } from '../api.js';
+import { APP_NAME } from '../brand.js';
 
 function select(options, value) {
     const el = h('select.input', options.map(([v, label]) => h('option', { value: String(v) }, label)));
@@ -28,27 +29,27 @@ export class SettingsView {
         const o = this.app.config.session;
         const encoders = (this.app.device && this.app.device.encoders) || [];
 
-        this.maxSize = select([[1280, '1280 (brže)'], [1600, '1600'], [1920, '1920 (preporučeno)'], [2400, '2400'], [0, 'Puna rezolucija telefona']], o.maxSize);
-        this.bitRate = select([[4000000, '4 Mb/s'], [8000000, '8 Mb/s'], [12000000, '12 Mb/s (preporučeno)'], [16000000, '16 Mb/s'],
+        this.maxSize = select([[1280, '1280 (faster)'], [1600, '1600'], [1920, '1920 (recommended)'], [2400, '2400'], [0, 'Full phone resolution']], o.maxSize);
+        this.bitRate = select([[4000000, '4 Mb/s'], [8000000, '8 Mb/s'], [12000000, '12 Mb/s (recommended)'], [16000000, '16 Mb/s'],
             [24000000, '24 Mb/s'], [32000000, '32 Mb/s'], [50000000, '50 Mb/s']], o.bitRate);
-        this.maxFps = select([[30, '30'], [60, '60 (preporučeno)'], [90, '90'], [120, '120']], o.maxFps);
-        this.codec = select([['h264', 'H.264 (najkompatibilnije)'], ['h265', 'H.265 / HEVC (manje podataka, ako PC podržava)']], o.codec);
-        this.encoder = select([['', 'Automatski'], ...encoders.map((name) => [name, name])], o.encoderName || '');
+        this.maxFps = select([[30, '30'], [60, '60 (recommended)'], [90, '90'], [120, '120']], o.maxFps);
+        this.codec = select([['h264', 'H.264 (most compatible)'], ['h265', 'H.265 / HEVC (less data, if the PC supports it)']], o.codec);
+        this.encoder = select([['', 'Automatic'], ...encoders.map((name) => [name, name])], o.encoderName || '');
         this.audio = checkbox(o.audio !== false);
         this.screenOff = checkbox(o.turnScreenOff);
         this.stayAwake = checkbox(o.stayAwake !== false);
-        this.mode = select([['mirror', 'Ogledalo ekrana telefona (za igre)'], ['desktop', 'Poseban desktop ekran (eksperimentalno)']],
+        this.mode = select([['mirror', 'Mirror the phone screen (for games)'], ['desktop', 'Separate desktop screen (experimental)']],
             o.newDisplay ? 'desktop' : 'mirror');
         this.desktopSize = select([['1920x1080/240', '1920×1080'], ['1600x900/220', '1600×900'], ['2560x1440/320', '2560×1440'],
             ['1280x720/180', '1280×720']], o.newDisplay || '1920x1080/240');
-        this.audioLatency = select([[40, '40 ms (najmanje kašnjenje)'], [60, '60 ms (preporučeno)'], [100, '100 ms'], [160, '160 ms (najstabilnije)']],
+        this.audioLatency = select([[40, '40 ms (lowest latency)'], [60, '60 ms (recommended)'], [100, '100 ms'], [160, '160 ms (most stable)']],
             this.app.audioLatency);
-        this.volume = h('input.volume-slider', { type: 'range', 'data-volume-control': '', 'aria-label': 'Jačina zvuka', min: '0', max: '1', step: '0.01', value: String(this.app.volume) });
+        this.volume = h('input.volume-slider', { type: 'range', 'data-volume-control': '', 'aria-label': 'Volume', min: '0', max: '1', step: '0.01', value: String(this.app.volume) });
         this.volume.style.setProperty('--volume-progress', Math.round(this.app.volume * 100) + '%');
         this.volume.addEventListener('input', () => this.app.setVolume(parseFloat(this.volume.value)));
         this.audioLatency.addEventListener('change', () => this.app.setAudioLatency(parseInt(this.audioLatency.value, 10)));
 
-        const desktopRow = h('div.field', h('label', 'Veličina desktop ekrana'), this.desktopSize);
+        const desktopRow = h('div.field', h('label', 'Desktop screen size'), this.desktopSize);
         const updateMode = () => desktopRow.classList.toggle('hidden', this.mode.value !== 'desktop');
         this.mode.addEventListener('change', updateMode);
         updateMode();
@@ -61,43 +62,43 @@ export class SettingsView {
 
         this.element = h('div.view',
             h('div.view-intro', h('div.view-intro-icon', '⚙️'),
-                h('div', h('h2', 'Po tvojoj mjeri.'), h('p', 'Slika, zvuk i kontrole za tvoj način rada.'))),
+                h('div', h('h2', 'Made to fit you.'), h('p', 'Picture, sound and controls the way you like them.'))),
             h('div.section',
-                h('h3', '🎞️ Slika'),
+                h('h3', '🎞️ Picture'),
                 h('div.row',
-                    h('div.field', h('label', 'Rezolucija (duža strana)'), this.maxSize),
-                    h('div.field', h('label', 'Protok (bitrate)'), this.bitRate),
-                    h('div.field', h('label', 'Maks. FPS'), this.maxFps)),
+                    h('div.field', h('label', 'Resolution (long side)'), this.maxSize),
+                    h('div.field', h('label', 'Bitrate'), this.bitRate),
+                    h('div.field', h('label', 'Max FPS'), this.maxFps)),
                 h('div.row',
-                    h('div.field', h('label', 'Kodek'), this.codec),
-                    h('div.field', h('label', 'Enkoder na telefonu'), this.encoder)),
-                h('p.small.muted', 'Ako slika seče: smanji protok ili rezoluciju. Ako je mutna: povećaj protok. Za najmanje kašnjenje koristi Wi-Fi 5 GHz.')),
+                    h('div.field', h('label', 'Codec'), this.codec),
+                    h('div.field', h('label', 'Phone encoder'), this.encoder)),
+                h('p.small.muted', 'If the picture stutters, lower the bitrate or resolution. If it is blurry, raise the bitrate. Use 5 GHz Wi-Fi for the lowest latency.')),
             h('div.section',
-                h('h3', '🔊 Zvuk'),
-                h('label.check', this.audio, h('span.check-text', 'Prenos zvuka sa telefona', h('small', 'Android 12+. Dok traje, telefon je nem.'))),
+                h('h3', '🔊 Sound'),
+                h('label.check', this.audio, h('span.check-text', 'Stream sound from the phone', h('small', 'Android 12+. The phone is muted meanwhile.'))),
                 h('div.row',
-                    h('div.field', h('label', 'Bafer (kašnjenje zvuka)'), this.audioLatency),
-                    h('div.field', h('label', 'Jačina'), this.volume))),
+                    h('div.field', h('label', 'Buffer (audio delay)'), this.audioLatency),
+                    h('div.field', h('label', 'Volume'), this.volume))),
             h('div.section',
-                h('h3', '📱 Telefon'),
-                h('label.check', this.screenOff, h('span.check-text', 'Ugasi ekran telefona pri povezivanju',
-                    h('small', 'Igra radi i dalje; ekran se vraća kad prekineš vezu (ili pritisni dugme za napajanje).'))),
-                h('label.check', this.stayAwake, h('span.check-text', 'Ne dozvoli telefonu da zaspi dok je povezan')),
+                h('h3', '📱 Phone'),
+                h('label.check', this.screenOff, h('span.check-text', 'Turn the phone screen off when connecting',
+                    h('small', 'The game keeps running; the screen comes back when you disconnect (or press the power button).'))),
+                h('label.check', this.stayAwake, h('span.check-text', 'Keep the phone awake while connected')),
                 h('div.row',
-                    h('div.field', h('label', 'Režim'), this.mode),
+                    h('div.field', h('label', 'Mode'), this.mode),
                     desktopRow),
-                h('p.small.muted', 'Poseban desktop pravi dodatni (virtuelni) ekran na telefonu; aplikacije iz menija Start se otvaraju na njemu. ',
-                    'Na Pixel-u najbolje radi uz Opcije za programere → „Omogući prozore promenljive veličine“ i „Nametni režim računara“.')),
+                h('p.small.muted', 'Separate desktop creates an extra (virtual) screen on the phone; apps from the Start menu open on it. ',
+                    'On a Pixel it works best with Developer options → "Enable freeform windows" and "Force desktop mode".')),
             h('div.section',
                 h('h3', '🖥️ Display'),
                 h('label.check', this.startFullscreen, h('span.check-text', 'Start in fullscreen',
-                    h('small', 'Wi-Dex opens over the whole screen (F11 to exit). Fullscreen for a single app is separate: F10.')))),
+                    h('small', APP_NAME + ' opens over the whole screen (F11 to exit). Fullscreen for a single app is separate: F10.')))),
             h('div.row',
-                h('button.btn.btn-primary.btn-lg', { onclick: () => this.apply(true) }, 'Sačuvaj i ponovo poveži'),
-                h('button.btn.btn-lg', { onclick: () => this.apply(false) }, 'Samo sačuvaj')),
+                h('button.btn.btn-primary.btn-lg', { onclick: () => this.apply(true) }, 'Save and reconnect'),
+                h('button.btn.btn-lg', { onclick: () => this.apply(false) }, 'Save only')),
             h('div.section',
-                h('div.section-title', h('h3', '🧰 Dijagnostika'),
-                    h('button.btn.btn-sm', { onclick: () => this.toggleLogs() }, 'Prikaži log')),
+                h('div.section-title', h('h3', '🧰 Diagnostics'),
+                    h('button.btn.btn-sm', { onclick: () => this.toggleLogs() }, 'Show log')),
                 this.infoEl,
                 this.logs));
         this.loadInfo();
@@ -120,7 +121,7 @@ export class SettingsView {
     async apply(restart) {
         const session = Object.assign({}, this.app.config.session, this.collect());
         await this.app.updateSessionConfig(session);
-        toast('Podešavanja sačuvana', 'ok', 2500);
+        toast('Settings saved', 'ok', 2500);
         if (restart && this.app.session) {
             this.app.startSession(this.app.session.serial);
         }
@@ -130,9 +131,9 @@ export class SettingsView {
         try {
             const info = this.app.info || await api.info();
             this.infoEl.replaceChildren(
-                h('div', 'Wi-Dex ', info.version, ' · server ', info.serverVersion),
-                h('div', 'adb: ', h('code', info.adb), info.adbVersion ? ' (' + info.adbVersion + ')' : ' — ', info.adbVersion ? '' : h('b', 'nije pronađen!')),
-                h('div', 'Podaci (profili, podešavanja): ', h('code', info.dataDir)));
+                h('div', APP_NAME + ' ', info.version, ' · server ', info.serverVersion),
+                h('div', 'adb: ', h('code', info.adb), info.adbVersion ? ' (' + info.adbVersion + ')' : ' — ', info.adbVersion ? '' : h('b', 'not found!')),
+                h('div', 'Data (profiles, settings): ', h('code', info.dataDir)));
         } catch (e) {
             this.infoEl.textContent = e.message;
         }
@@ -145,7 +146,7 @@ export class SettingsView {
         }
         const data = await api.sessionLogs(this.app.session ? this.app.session.id : '');
         const lines = data.logs.length ? data.logs : data.server;
-        this.logs.textContent = lines.join('\n') || '(prazno)';
+        this.logs.textContent = lines.join('\n') || '(empty)';
         this.logs.classList.remove('hidden');
         this.logs.scrollTop = this.logs.scrollHeight;
     }

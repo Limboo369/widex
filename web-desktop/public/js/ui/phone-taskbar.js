@@ -3,7 +3,7 @@ import { api } from '../api.js';
 import { icon } from './icons.js';
 import { AppVisualGate } from './app-visual-gate.js';
 
-const STORAGE_KEY = 'widex.phoneApps';
+const STORAGE_KEY = 'beam.phoneApps';
 
 /** Shortcuts to apps opened during this phone session; all share the existing stream. */
 export class PhoneTaskbar {
@@ -148,7 +148,7 @@ export class PhoneTaskbar {
     async launch(item) {
         const session = this.app.session;
         if (!session || session.state !== 'running') {
-            toast('Prvo poveži telefon', 'warn');
+            toast('Connect your phone first', 'warn');
             return false;
         }
         if (this.pending) return false;
@@ -186,7 +186,7 @@ export class PhoneTaskbar {
             }
             if (this.pending !== operation || this.sessionId !== operation.sessionId || this.app.session?.id !== operation.sessionId) return false;
             this.app.openPhone();
-            this.app.windows.get('phone')?.setTitle?.((this.app.device?.model || 'Telefon') + ' — ' + item.label);
+            this.app.windows.get('phone')?.setTitle?.((this.app.device?.model || 'Phone') + ' — ' + item.label);
             if (opening && this.app.windows.animateDock) {
                 await this.app.windows.animateDock('phone', this.targetFor(item.package), true);
             }
@@ -197,7 +197,7 @@ export class PhoneTaskbar {
                     this.app.openPhone();
                     await this.app.windows.animateDock('phone', this.targetFor(this.app.foregroundPackage()), true);
                 }
-                toast('Ne mogu da otvorim ' + item.label + ': ' + error.message, 'error');
+                toast('Could not open ' + item.label + ': ' + error.message, 'error');
             }
             return false;
         } finally {
@@ -217,7 +217,7 @@ export class PhoneTaskbar {
                 : h('span.phone-taskbar-fallback', icon('grid'));
             const active = this.app.foregroundPackage() === item.package && this.app.windows.active === 'phone' && phone && !phone.minimized;
             const button = h('button.taskbar-item.phone-taskbar-item', {
-                title: 'Otvori ' + item.label, 'aria-label': 'Otvori ' + item.label,
+                title: 'Open ' + item.label, 'aria-label': 'Open ' + item.label,
                 'aria-pressed': String(!!active), disabled: !!this.pending,
                 dataset: { package: item.package }, onclick: () => this.activate(item),
             }, image, h('span', item.label));

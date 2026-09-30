@@ -1,6 +1,7 @@
 /**
- * Calls to the local Wi-Dex server (server.js).
+ * Calls to the local Beam server (server.js).
  */
+import { APP_NAME } from './brand.js';
 
 async function request(method, url, body) {
     const options = { method, headers: {} };
@@ -12,7 +13,7 @@ async function request(method, url, body) {
     try {
         response = await fetch(url, options);
     } catch (e) {
-        throw new Error('Wi-Dex server ne radi (pokreni start.bat)');
+        throw new Error(APP_NAME + ' server is not running');
     }
     let data = null;
     try {

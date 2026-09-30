@@ -1,7 +1,7 @@
 {
-  "name": "Wi-Dex",
-  "short_name": "Wi-Dex",
-  "description": "Igraj Android igre sa PC-a",
+  "name": "Beam",
+  "short_name": "Beam",
+  "description": "Play Android games on your PC",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0d14",

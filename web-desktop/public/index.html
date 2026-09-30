@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wi-Dex</title>
+    <title>Beam</title>
     <link rel="icon" href="img/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="css/style.css">
@@ -21,12 +21,12 @@
     </svg>
     <div id="desktop">
         <header class="desktop-topbar">
-            <div class="desktop-brand"><button class="brand-menu-btn" id="brand-menu-btn" title="Wi-Dex menu" aria-haspopup="menu" aria-expanded="false" aria-controls="brand-menu"><img src="img/icon.svg" alt=""><strong>Wi-Dex</strong></button><span class="brand-divider"></span><span>Radni prostor</span></div>
+            <div class="desktop-brand"><button class="brand-menu-btn" id="brand-menu-btn" title="Beam menu" aria-haspopup="menu" aria-expanded="false" aria-controls="brand-menu"><img src="img/icon.svg" alt=""><strong>Beam</strong></button><span class="brand-divider"></span><span>Workspace</span></div>
             <div class="topbar-tools hidden" id="topbar-tools" aria-label="Phone controls"></div>
-            <div class="desktop-status"><span class="status-dot" id="desktop-status-dot"></span><span id="desktop-connection-status">Spreman za povezivanje</span><span class="topbar-date" id="desktop-date"></span><button class="topbar-btn" id="btn-widex-fullscreen" title="Wi-Dex fullscreen (F11)" aria-label="Wi-Dex fullscreen" data-icon="widex-fullscreen"></button></div>
+            <div class="desktop-status"><span class="status-dot" id="desktop-status-dot"></span><span id="desktop-connection-status">Ready to connect</span><span class="topbar-date" id="desktop-date"></span><button class="topbar-btn" id="btn-beam-fullscreen" title="Beam fullscreen (F11)" aria-label="Beam fullscreen" data-icon="beam-fullscreen"></button></div>
         </header>
         <div id="brand-menu" class="brand-menu glass-panel hidden" role="menu" aria-labelledby="brand-menu-btn">
-            <button role="menuitem" data-brand="fullscreen"><span data-icon="widex-fullscreen"></span><span class="brand-menu-label" id="brand-fullscreen-label">Wi-Dex fullscreen</span><kbd>F11</kbd></button>
+            <button role="menuitem" data-brand="fullscreen"><span data-icon="beam-fullscreen"></span><span class="brand-menu-label" id="brand-fullscreen-label">Beam fullscreen</span><kbd>F11</kbd></button>
             <div class="brand-menu-note">App fullscreen (phone screen only): <span data-icon="app-fullscreen"></span> in the top bar or <kbd>F10</kbd></div>
             <div class="brand-menu-sep"></div>
             <button role="menuitem" data-brand="settings"><span data-icon="settings"></span><span class="brand-menu-label">Settings</span></button>
@@ -35,27 +35,27 @@
         <div class="desktop-icons">
             <button class="desktop-icon" data-action="phone">
                 <div class="icon-img" data-icon="phone"></div>
-                <span>Telefon</span>
+                <span>Phone</span>
             </button>
             <button class="desktop-icon" data-action="apps">
                 <div class="icon-img" data-icon="game"></div>
-                <span>Igre i aplikacije</span>
+                <span>Games & apps</span>
             </button>
             <button class="desktop-icon" data-action="keymap">
                 <div class="icon-img" data-icon="keyboard"></div>
-                <span>Mapiranje tastera</span>
+                <span>Key mapping</span>
             </button>
             <button class="desktop-icon" data-action="connect">
                 <div class="icon-img" data-icon="wifi"></div>
-                <span>Povezivanje</span>
+                <span>Connect</span>
             </button>
             <button class="desktop-icon" data-action="settings">
                 <div class="icon-img" data-icon="settings"></div>
-                <span>Podešavanja</span>
+                <span>Settings</span>
             </button>
             <button class="desktop-icon" data-action="help">
                 <div class="icon-img" data-icon="help"></div>
-                <span>Pomoć</span>
+                <span>Help</span>
             </button>
         </div>
 
@@ -66,43 +66,43 @@
                 <div class="start-device">
                     <div class="avatar" data-icon="phone"></div>
                     <div>
-                        <h4 id="start-device-name">Telefon nije povezan</h4>
-                        <span id="start-device-status" class="tag">Nije povezano</span>
+                        <h4 id="start-device-name">No phone connected</h4>
+                        <span id="start-device-status" class="tag">Not connected</span>
                     </div>
                 </div>
                 <div class="start-search">
-                    <input type="text" id="app-search" class="input" placeholder="Pretraži igre i aplikacije..." autocomplete="off">
-                    <button class="btn" id="btn-refresh-apps" title="Ponovo učitaj listu sa telefona" aria-label="Osvježi aplikacije" data-icon="refresh"></button>
+                    <input type="text" id="app-search" class="input" placeholder="Search games and apps..." autocomplete="off">
+                    <button class="btn" id="btn-refresh-apps" title="Reload the list from the phone" aria-label="Refresh apps" data-icon="refresh"></button>
                 </div>
-                <label class="check small"><input type="checkbox" id="show-system-apps"> Prikaži i sistemske aplikacije</label>
+                <label class="check small"><input type="checkbox" id="show-system-apps"> Show system apps too</label>
             </div>
             <div class="start-apps">
                 <div id="app-grid" class="app-grid"></div>
                 <div id="apps-message" class="muted small"></div>
             </div>
             <div class="start-footer">
-                <button class="btn btn-sm" id="btn-start-screen"><span data-icon="light"></span> Ekran telefona</button>
-                <button class="btn btn-sm btn-danger" id="btn-start-disconnect">Prekini vezu</button>
+                <button class="btn btn-sm" id="btn-start-screen"><span data-icon="light"></span> Phone screen</button>
+                <button class="btn btn-sm btn-danger" id="btn-start-disconnect">Disconnect</button>
             </div>
         </div>
 
         <div id="taskbar" class="glass-panel">
-            <button id="start-btn" title="Igre i aplikacije" aria-label="Otvori igre i aplikacije" aria-expanded="false" aria-controls="start-menu"><span data-icon="grid"></span></button>
+            <button id="start-btn" title="Games & apps" aria-label="Open games & apps" aria-expanded="false" aria-controls="start-menu"><span data-icon="grid"></span></button>
             <div class="dock-separator"></div>
             <div id="taskbar-apps" class="taskbar-apps"><div id="taskbar-windows" class="taskbar-group"></div><div id="taskbar-phone-apps" class="taskbar-group"></div></div>
             <div class="taskbar-right">
-                <button class="tray-btn" id="tray-game" title="Režim igre (F8)"><span data-icon="game"></span><span id="tray-game-text">Isklj.</span></button>
-                <button class="tray-btn" id="tray-audio" title="Jačina zvuka" aria-label="Kontrola zvuka" aria-expanded="false" aria-controls="volume-panel"><span id="tray-audio-icon" data-icon="volume"></span><span id="tray-audio-text">--</span></button>
-                <button class="tray-btn" id="tray-ping" title="Kašnjenje (ping do telefona)"><span data-icon="wifi"></span><span id="tray-ping-text">--</span></button>
-                <button class="tray-btn" id="tray-battery" title="Baterija telefona"><span data-icon="battery"></span><span id="tray-battery-text">--</span></button>
+                <button class="tray-btn" id="tray-game" title="Game mode (F8)"><span data-icon="game"></span><span id="tray-game-text">Off</span></button>
+                <button class="tray-btn" id="tray-audio" title="Volume" aria-label="Sound control" aria-expanded="false" aria-controls="volume-panel"><span id="tray-audio-icon" data-icon="volume"></span><span id="tray-audio-text">--</span></button>
+                <button class="tray-btn" id="tray-ping" title="Latency (ping to the phone)"><span data-icon="wifi"></span><span id="tray-ping-text">--</span></button>
+                <button class="tray-btn" id="tray-battery" title="Phone battery"><span data-icon="battery"></span><span id="tray-battery-text">--</span></button>
                 <div id="clock" class="clock">00:00</div>
             </div>
         </div>
         <div id="volume-panel" class="volume-panel glass-panel hidden" role="dialog" aria-labelledby="volume-panel-title">
-            <div class="volume-panel-header"><div><h3 id="volume-panel-title">Zvuk telefona</h3><p>Jačina zvuka na računaru</p></div><output id="volume-value" for="volume-slider">100%</output></div>
-            <label class="sr-only" for="volume-slider">Jačina zvuka</label>
+            <div class="volume-panel-header"><div><h3 id="volume-panel-title">Phone sound</h3><p>Volume on the PC</p></div><output id="volume-value" for="volume-slider">100%</output></div>
+            <label class="sr-only" for="volume-slider">Volume</label>
             <input id="volume-slider" class="volume-slider" data-volume-control type="range" min="0" max="1" step="0.01" value="1">
-            <div class="volume-panel-footer"><button id="volume-mute" class="btn btn-sm" aria-pressed="false"><span id="volume-mute-icon" data-icon="volume"></span><span id="volume-mute-label">Utišaj</span></button><span id="volume-hint">Zvuk je uključen</span></div>
+            <div class="volume-panel-footer"><button id="volume-mute" class="btn btn-sm" aria-pressed="false"><span id="volume-mute-icon" data-icon="volume"></span><span id="volume-mute-label">Mute</span></button><span id="volume-hint">Sound is on</span></div>
         </div>
     </div>
 

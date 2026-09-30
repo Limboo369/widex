@@ -7,7 +7,7 @@ export class AppVisualGate {
         this.done = false;
         this.requestFrame = requestFrame;
         this.promise = new Promise((resolve, reject) => { this.resolve = resolve; this.reject = reject; });
-        this.timeout = setTimeout(() => this.finish(new Error('Telefon još nije prikazao novu aplikaciju. Klikni njenu karticu da pokušaš ponovo.')), timeoutMs);
+        this.timeout = setTimeout(() => this.finish(new Error('The phone has not shown the new app yet. Click its tab to try again.')), timeoutMs);
         this.settleMs = settleMs;
     }
 
@@ -40,5 +40,5 @@ export class AppVisualGate {
         if (error) this.reject(error); else this.resolve();
     }
 
-    cancel() { this.finish(new Error('Veza je prekinuta.')); }
+    cancel() { this.finish(new Error('Disconnected.')); }
 }

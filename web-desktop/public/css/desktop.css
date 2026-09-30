@@ -1,4 +1,4 @@
-/* Wi-Dex desktop design system — local, scalable, and shared by every view. */
+/* Beam desktop design system — local, scalable, and shared by every view. */
 :root {
     color-scheme: dark;
     --bg-dark: #0f1929;
@@ -249,7 +249,7 @@ select.input option { background: var(--panel-solid); color: var(--text); }
 .window.overlay-header.header-reveal .window-header { opacity: 1; transform: none; pointer-events: auto; }
 .window.overlay-header .window-body { flex: 1; }
 .window.fitting { transition: left .25s ease, top .25s ease, width .25s ease, height .25s ease; }
-/* Wi-Dex menu (brand) and Wi-Dex over the whole screen (F11) */
+/* Beam menu (brand) and Beam over the whole screen (F11) */
 .brand-menu-btn { display: flex; align-items: center; gap: 10px; margin: 0 -8px; padding: 5px 8px; border: 0; border-radius: 9px; background: none; color: inherit; font: inherit; cursor: pointer; }
 .brand-menu-btn:hover, .brand-menu-btn[aria-expanded="true"] { background: rgba(214, 230, 255, .1); }
 .brand-menu { position: absolute; z-index: 6000; top: 52px; left: 20px; width: 300px; padding: 6px; border-radius: 14px; background: var(--glass-surface); display: flex; flex-direction: column; font-size: 13px; color: #e3ebf8; }

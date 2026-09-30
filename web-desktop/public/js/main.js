@@ -1,5 +1,5 @@
 /**
- * Wi-Dex web desktop: application controller.
+ * Beam web desktop: application controller.
  */
 import { $, $$, h, toast } from './util/dom.js';
 import { api } from './api.js';
@@ -14,6 +14,7 @@ import { SettingsView } from './views/settings-view.js';
 import { AppsMenu } from './views/apps-menu.js';
 import { createHelpView } from './views/help-view.js';
 import { AppFullscreen } from './ui/app-fullscreen.js';
+import { APP_NAME } from './brand.js';
 
 const PACKET_SESSION = 0;
 const CODEC_H265 = 0x68323635;
@@ -34,9 +35,9 @@ class App {
         this.connectView = null;
         this.videoDisplayId = 0;
         this.audio = new AudioPlayer();
-        this.muted = localStorage.getItem('widex.muted') === '1';
-        this.volume = parseFloat(localStorage.getItem('widex.volume') || '1');
-        this.audioLatency = parseInt(localStorage.getItem('widex.audioLatency') || '60', 10);
+        this.muted = localStorage.getItem('beam.muted') === '1';
+        this.volume = parseFloat(localStorage.getItem('beam.volume') || '1');
+        this.audioLatency = parseInt(localStorage.getItem('beam.audioLatency') || '60', 10);
         this.audio.setMuted(this.muted);
         this.audio.setVolume(this.volume);
         this.audio.setTargetLatency(this.audioLatency);
@@ -74,10 +75,10 @@ class App {
             this.fullscreen.enterOnFirstInput();
         }
         if (!this.info.adbVersion) {
-            toast('adb nije pronađen. Instaliraj Android SDK Platform-Tools (ili Android Studio).', 'error', 15000);
+            toast('adb was not found. Install the Android SDK Platform-Tools (or Android Studio).', 'error', 15000);
         }
         if (typeof window.VideoDecoder !== 'function') {
-            toast('Ovaj browser ne podržava WebCodecs — koristi Chrome ili Edge i adresu http://localhost', 'error', 15000);
+            toast('This browser does not support WebCodecs. Use Chrome or Edge at http://localhost', 'error', 15000);
         }
 
         // resume an existing session (page reloaded), or connect to the last phone
@@ -113,7 +114,7 @@ class App {
             const ready = devices.filter((d) => d.state === 'device');
             const target = ready.find((d) => d.serial === last) || (ready.length === 1 && last ? ready[0] : null);
             if (target) {
-                toast('Povezujem se na ' + (target.model || target.serial) + '...', 'info', 3000);
+                toast('Connecting to ' + (target.model || target.serial) + '...', 'info', 3000);
                 this.startSession(target.serial);
             }
         } catch (e) {
@@ -133,7 +134,7 @@ class App {
                 this.openPhone();
                 this.phoneView.toggleGameMode();
             } else {
-                toast('Prvo poveži telefon', 'warn');
+                toast('Connect your phone first', 'warn');
             }
         });
         const audioButton = $('#tray-audio');
@@ -172,22 +173,22 @@ class App {
         this.updateTray();
     }
 
-    /** The Wi-Dex menu at the left of the top bar, and Wi-Dex over the whole screen (F11). */
+    /** The Beam menu at the left of the top bar, and Beam over the whole screen (F11). */
     installBrandMenu() {
         this.fullscreen = new AppFullscreen();
         const button = $('#brand-menu-btn');
         const menu = $('#brand-menu');
-        const fullscreenButton = $('#btn-widex-fullscreen');
+        const fullscreenButton = $('#btn-beam-fullscreen');
         const setOpen = (open) => {
             menu.classList.toggle('hidden', !open);
             button.setAttribute('aria-expanded', String(open));
         };
         const update = (on) => {
-            const label = on ? 'Exit fullscreen' : 'Wi-Dex fullscreen';
+            const label = on ? 'Exit fullscreen' : APP_NAME + ' fullscreen';
             fullscreenButton.title = label + ' (F11)';
             fullscreenButton.setAttribute('aria-label', label);
             fullscreenButton.classList.toggle('active', on);
-            fullscreenButton.replaceChildren(icon(on ? 'widex-fullscreen-exit' : 'widex-fullscreen'));
+            fullscreenButton.replaceChildren(icon(on ? 'beam-fullscreen-exit' : 'beam-fullscreen'));
             $('#brand-fullscreen-label').textContent = label;
         };
         this.fullscreen.onChange = update;
@@ -238,7 +239,7 @@ class App {
                 break;
             case 'keymap':
                 if (!this.phoneView) {
-                    toast('Prvo poveži telefon i otvori igru', 'warn');
+                    toast('Connect your phone and open a game first', 'warn');
                     return;
                 }
                 this.openPhone();
@@ -261,8 +262,8 @@ class App {
     startClock() {
         const clock = $('#clock');
         const update = () => {
-            clock.textContent = new Date().toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' });
-            $('#desktop-date').textContent = new Date().toLocaleDateString('sr-Latn', { weekday: 'short', day: 'numeric', month: 'long' });
+            clock.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            $('#desktop-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
         };
         update();
         setInterval(update, 5000);
@@ -271,14 +272,14 @@ class App {
     updateTray() {
         const gameOn = this.phoneView && this.phoneView.gameMode;
         $('#tray-game').classList.toggle('on', !!gameOn);
-        $('#tray-game-text').textContent = gameOn ? 'Uklj.' : 'Isklj.';
-        $('#tray-audio-text').textContent = this.muted ? 'Nem' : Math.round(this.volume * 100) + '%';
+        $('#tray-game-text').textContent = gameOn ? 'On' : 'Off';
+        $('#tray-audio-text').textContent = this.muted ? 'Muted' : Math.round(this.volume * 100) + '%';
         $('#tray-audio-icon').replaceChildren(icon(this.muted ? 'muted' : 'volume'));
         $('#volume-value').textContent = Math.round(this.volume * 100) + '%';
         $('#volume-mute-icon').replaceChildren(icon(this.muted ? 'muted' : 'volume'));
-        $('#volume-mute-label').textContent = this.muted ? 'Uključi zvuk' : 'Utišaj';
+        $('#volume-mute-label').textContent = this.muted ? 'Unmute' : 'Mute';
         $('#volume-mute').setAttribute('aria-pressed', String(this.muted));
-        $('#volume-hint').textContent = this.muted || this.volume === 0 ? 'Zvuk je utišan' : 'Zvuk je uključen';
+        $('#volume-hint').textContent = this.muted || this.volume === 0 ? 'Sound is muted' : 'Sound is on';
         for (const control of $$('[data-volume-control]')) {
             control.value = String(this.volume);
             control.style.setProperty('--volume-progress', Math.round(this.volume * 100) + '%');
@@ -287,19 +288,19 @@ class App {
         $('#tray-ping-text').textContent = this.ping !== null ? this.ping + ' ms' : '--';
         const battery = this.session && this.session.battery;
         $('#tray-battery-text').textContent = battery ? battery.level + '%' : '--';
-        $('#tray-battery').title = battery && battery.charging ? 'Baterija telefona · Punjenje' : 'Baterija telefona';
+        $('#tray-battery').title = battery && battery.charging ? 'Phone battery · Charging' : 'Phone battery';
 
-        const name = this.device ? (this.device.manufacturer + ' ' + this.device.model) : 'Telefon nije povezan';
+        const name = this.device ? (this.device.manufacturer + ' ' + this.device.model) : 'No phone connected';
         $('#start-device-name').textContent = name;
         const status = $('#start-device-status');
         const connected = this.session && this.session.state === 'running';
-        $('#desktop-connection-status').textContent = connected ? name + ' · Povezano' : 'Spreman za povezivanje';
+        $('#desktop-connection-status').textContent = connected ? name + ' · Connected' : 'Ready to connect';
         $('#desktop-status-dot').classList.toggle('connected', !!connected);
         if (this.session && this.session.state === 'running') {
-            status.textContent = 'Povezano' + (this.device ? ' · Android ' + this.device.release : '');
+            status.textContent = 'Connected' + (this.device ? ' · Android ' + this.device.release : '');
             status.className = 'tag ok';
         } else {
-            status.textContent = 'Nije povezano';
+            status.textContent = 'Not connected';
             status.className = 'tag';
         }
     }
@@ -314,7 +315,7 @@ class App {
         if (!this.phoneView) {
             if (!this.session) {
                 this.openConnect();
-                toast('Prvo poveži telefon', 'warn');
+                toast('Connect your phone first', 'warn');
             }
             return;
         }
@@ -350,7 +351,7 @@ class App {
     }
 
     phoneTitle() {
-        const model = this.device ? this.device.model : 'Telefon';
+        const model = this.device ? this.device.model : 'Phone';
         const app = this.foreground ? (this.appLabel(this.foreground.package) || this.foreground.package) : '';
         return model + (app ? ' — ' + app : '');
     }
@@ -362,7 +363,7 @@ class App {
         if (!this.windows.has('connect')) {
             this.windows.open({
                 id: 'connect',
-                title: 'Povezivanje telefona',
+                title: 'Connect a phone',
                 icon: '📶',
                 width: 640,
                 height: 720,
@@ -384,7 +385,7 @@ class App {
             return;
         }
         const view = new SettingsView(this);
-        this.windows.open({ id: 'settings', title: 'Podešavanja', icon: '⚙️', width: 640, height: 720, content: view.element });
+        this.windows.open({ id: 'settings', title: 'Settings', icon: '⚙️', width: 640, height: 720, content: view.element });
     }
 
     openHelp() {
@@ -392,7 +393,7 @@ class App {
             this.windows.focus('help');
             return;
         }
-        this.windows.open({ id: 'help', title: 'Pomoć', icon: '❔', width: 640, height: 700, content: createHelpView() });
+        this.windows.open({ id: 'help', title: 'Help', icon: '❔', width: 640, height: 700, content: createHelpView() });
     }
 
     // ------------------------------------------------------------------ session
@@ -406,7 +407,7 @@ class App {
         try {
             this.config = await api.saveConfig({ session });
         } catch (e) {
-            toast('Ne mogu da sačuvam podešavanja: ' + e.message, 'error');
+            toast('Could not save the settings: ' + e.message, 'error');
         }
     }
 
@@ -433,7 +434,7 @@ class App {
         } catch (e) {
             this.phoneView.onStreamStopped(e.message);
             if (!quiet) {
-                toast('Pokretanje nije uspelo: ' + e.message, 'error', 10000);
+                toast('Could not start: ' + e.message, 'error', 10000);
                 this.openConnect();
             }
             return false;
@@ -465,7 +466,7 @@ class App {
         this.reconnecting = true;
         try {
             for (let attempt = 1; attempt <= attempts && !this.session; ++attempt) {
-                this.phoneView.showMessage('Ponovo se povezujem...', 'Pokušaj ' + attempt + ' od ' + attempts, true);
+                this.phoneView.showMessage('Reconnecting...', 'Attempt ' + attempt + ' of ' + attempts, true);
                 await new Promise((resolve) => setTimeout(resolve, attempt === 1 ? 1000 : 3000));
                 let devices = [];
                 try {
@@ -484,12 +485,12 @@ class App {
                     continue;
                 }
                 if (await this.startSession(serial, { quiet: true })) {
-                    toast('Veza je ponovo uspostavljena', 'ok');
+                    toast('Reconnected', 'ok');
                     return;
                 }
             }
             if (!this.session) {
-                this.phoneView.onStreamStopped('Telefon nije dostupan. Proveri Wi-Fi i da je „Bežično otklanjanje grešaka“ uključeno.');
+                this.phoneView.onStreamStopped('The phone is not reachable. Check Wi-Fi and that "Wireless debugging" is on.');
             }
         } finally {
             this.reconnecting = false;
@@ -508,7 +509,7 @@ class App {
             // ignore
         }
         if (this.phoneView) {
-            this.phoneView.onStreamStopped('Veza je prekinuta.');
+            this.phoneView.onStreamStopped('Disconnected.');
         }
         this.updateTray();
         this.openConnect();
@@ -549,7 +550,7 @@ class App {
                 if (unexpected) {
                     this.autoReconnect(session.serial);
                 } else {
-                    this.phoneView.onStreamStopped(reason === 'connection-lost' ? 'Izgubljena veza sa Wi-Dex serverom (start.bat).' : 'Sesija je završena.');
+                    this.phoneView.onStreamStopped(reason === 'connection-lost' ? 'Lost the connection to the ' + APP_NAME + ' server.' : 'The session has ended.');
                 }
             },
             onJson: (msg) => this.onJson(msg),
@@ -609,16 +610,16 @@ class App {
             case 'clipboard':
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(msg.text).then(
-                        () => toast('Kopirano sa telefona', 'ok', 1500),
-                        () => toast('Browser nije dozvolio kopiranje', 'warn'));
+                        () => toast('Copied from the phone', 'ok', 1500),
+                        () => toast('The browser did not allow copying', 'warn'));
                 }
                 break;
             case 'stopped':
                 this.lastStopReason = msg.reason;
                 if (msg.reason === 'idle') {
-                    toast('Sesija je zaustavljena jer nijedan prozor nije bio otvoren.', 'warn', 8000);
+                    toast('The session was stopped because no window was open.', 'warn', 8000);
                 } else if (msg.reason && !['user', 'restart', 'shutdown'].includes(msg.reason)) {
-                    toast('Veza sa telefonom je prekinuta — pokušavam ponovo...', 'warn', 5000);
+                    toast('Lost the connection to the phone. Trying again...', 'warn', 5000);
                 }
                 break;
             default:
@@ -658,7 +659,7 @@ class App {
                     this.session.screenOn = event.on;
                 }
                 if (!event.ok) {
-                    toast('Telefon nije dozvolio promenu ekrana', 'warn');
+                    toast('The phone did not allow changing the screen', 'warn');
                 }
                 if (this.phoneView) {
                     this.phoneView.updateButtons();
@@ -669,14 +670,14 @@ class App {
                 this.updateTray();
                 break;
             case 'audio_error':
-                toast('Zvuk nije dostupan: ' + event.message, 'warn', 6000);
+                toast('Sound is not available: ' + event.message, 'warn', 6000);
                 break;
             case 'error':
-                toast('Telefon: ' + event.message, 'error', 8000);
+                toast('Phone: ' + event.message, 'error', 8000);
                 break;
             case 'app_started':
                 if (!event.ok) {
-                    toast('Aplikacija nije pokrenuta', 'warn');
+                    toast('The app did not start', 'warn');
                 }
                 break;
             default:
@@ -709,7 +710,7 @@ class App {
                 if (this.audio.isSuspended()) {
                     this.showAudioHint();
                 }
-            }).catch((e) => toast('Zvuk: ' + e.message, 'warn'));
+            }).catch((e) => toast('Sound: ' + e.message, 'warn'));
             return;
         }
         this.audio.push(buffer.slice(10));
@@ -720,7 +721,7 @@ class App {
             return;
         }
         this.audioHintShown = true;
-        toast('Klikni bilo gde da bi se čuo zvuk sa telefona', 'info', 5000);
+        toast('Click anywhere to hear the phone', 'info', 5000);
     }
 
     resumeAudio() {
@@ -737,7 +738,7 @@ class App {
 
     toggleMute() {
         this.muted = !this.muted;
-        localStorage.setItem('widex.muted', this.muted ? '1' : '0');
+        localStorage.setItem('beam.muted', this.muted ? '1' : '0');
         this.audio.setMuted(this.muted);
         this.resumeAudio();
         this.updateTray();
@@ -750,14 +751,14 @@ class App {
         if (!Number.isFinite(volume)) return;
         volume = Math.min(1, Math.max(0, volume));
         this.volume = volume;
-        localStorage.setItem('widex.volume', String(volume));
+        localStorage.setItem('beam.volume', String(volume));
         this.audio.setVolume(volume);
         this.updateTray();
     }
 
     setAudioLatency(ms) {
         this.audioLatency = ms;
-        localStorage.setItem('widex.audioLatency', String(ms));
+        localStorage.setItem('beam.audioLatency', String(ms));
         this.audio.setTargetLatency(ms);
     }
 
@@ -791,5 +792,5 @@ class App {
 }
 
 const app = new App();
-window.widex = app;
+window.beam = app;
 app.init();

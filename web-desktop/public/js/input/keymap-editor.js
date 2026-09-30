@@ -9,7 +9,7 @@ function clamp01(value) {
 }
 
 export function cloneProfile(profile) {
-    return JSON.parse(JSON.stringify(profile || { name: 'Novi profil', mouse: { sensitivity: 1 }, cursorKey: 'Backquote', controls: [] }));
+    return JSON.parse(JSON.stringify(profile || { name: 'New profile', mouse: { sensitivity: 1 }, cursorKey: 'Backquote', controls: [] }));
 }
 
 /**
@@ -33,17 +33,17 @@ export function renderMarkers(layer, profile, { selected = -1, pressed = new Set
                 h('span.km-center'));
             el.style.width = diameter + 'px';
             el.style.height = diameter + 'px';
-            el.title = 'Džojstik' + (def.sprint ? ' (trčanje: ' + keyName(def.sprint) + ')' : '');
+            el.title = 'Joystick' + (def.sprint ? ' (sprint: ' + keyName(def.sprint) + ')' : '');
         } else if (def.type === 'camera') {
             const zone = 2 * (def.zone || 0.3) * layerHeight;
             const zoneEl = h('div.km-zone');
             zoneEl.style.width = zone + 'px';
             zoneEl.style.height = zone + 'px';
             el = h('div.km-control.km-camera', '🖱️', zoneEl);
-            el.title = 'Kamera (pomeranje miša)';
+            el.title = 'Camera (mouse movement)';
         } else {
             el = h('div.km-control.km-button', keyName(def.key), def.label ? h('span.km-label', def.label) : null);
-            el.title = (def.label || 'Dugme') + ' — ' + keyName(def.key) + (def.mode === 'tap' ? ' (dodir)' : ' (drži)');
+            el.title = (def.label || 'Button') + ': ' + keyName(def.key) + (def.mode === 'tap' ? ' (tap)' : ' (hold)');
         }
         el.style.left = (def.x * 100) + '%';
         el.style.top = (def.y * 100) + '%';
@@ -122,7 +122,7 @@ export class KeymapEditor {
 
     buildToolbar() {
         const presetSelect = h('select.input', { style: { height: '30px', maxWidth: '190px' } },
-            h('option', { value: '' }, 'Šablon...'),
+            h('option', { value: '' }, 'Template...'),
             this.presets.map((p) => h('option', { value: p.id }, p.name)));
         presetSelect.addEventListener('change', () => {
             const preset = this.presets.find((p) => p.id === presetSelect.value);
@@ -137,22 +137,22 @@ export class KeymapEditor {
                 this.selected = -1;
                 this.dirty = true;
                 this.render();
-                toast('Učitan šablon "' + preset.name + '" — pomeri dugmad da se poklope sa igrom', 'info');
+                toast('Loaded the "' + preset.name + '" template. Move the markers onto the game buttons.', 'info');
             }
         });
         this.toolbar = h('div.keymap-toolbar.glass-panel',
-            h('b', { style: { marginRight: '6px' } }, '⌨️ ' + (this.title || 'Mapiranje')),
-            h('button.btn.btn-sm', { onclick: () => this.addControl('button') }, '+ Dugme'),
-            h('button.btn.btn-sm', { onclick: () => this.addControl('joystick') }, '+ Džojstik'),
-            h('button.btn.btn-sm', { onclick: () => this.addControl('camera') }, '+ Kamera'),
+            h('b', { style: { marginRight: '6px' } }, '⌨️ ' + (this.title || 'Keymap')),
+            h('button.btn.btn-sm', { onclick: () => this.addControl('button') }, '+ Button'),
+            h('button.btn.btn-sm', { onclick: () => this.addControl('joystick') }, '+ Joystick'),
+            h('button.btn.btn-sm', { onclick: () => this.addControl('camera') }, '+ Camera'),
             presetSelect,
-            h('button.btn.btn-sm.btn-primary', { onclick: () => this.save() }, '💾 Sačuvaj'),
-            h('button.btn.btn-sm', { onclick: () => this.requestClose() }, 'Zatvori'));
+            h('button.btn.btn-sm.btn-primary', { onclick: () => this.save() }, '💾 Save'),
+            h('button.btn.btn-sm', { onclick: () => this.requestClose() }, 'Close'));
         this.stage.appendChild(this.toolbar);
     }
 
     requestClose() {
-        if (this.dirty && !confirm('Imaš nesačuvane izmene. Zatvoriti bez čuvanja?')) {
+        if (this.dirty && !confirm('You have unsaved changes. Close without saving?')) {
             return;
         }
         this.close();
@@ -162,9 +162,9 @@ export class KeymapEditor {
         try {
             await this.onSave(cloneProfile(this.profile));
             this.dirty = false;
-            toast('Mapiranje sačuvano', 'ok');
+            toast('Keymap saved', 'ok');
         } catch (e) {
-            toast('Čuvanje nije uspelo: ' + e.message, 'error');
+            toast('Could not save: ' + e.message, 'error');
         }
     }
 
@@ -189,12 +189,12 @@ export class KeymapEditor {
         let def;
         if (type === 'joystick') {
             if (this.profile.controls.some((c) => c.type === 'joystick')) {
-                toast('Već postoji džojstik (možeš dodati još jedan za druge tastere)', 'warn');
+                toast('There is already a joystick (you can add another one for other keys)', 'warn');
             }
             def = { type: 'joystick', x: 0.16, y: 0.72, radius: 0.11, up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', sprint: 'ShiftLeft', sprintScale: 1.6 };
         } else if (type === 'camera') {
             if (this.profile.controls.some((c) => c.type === 'camera')) {
-                toast('Kamera već postoji — koristi se samo jedna', 'warn');
+                toast('There is already a camera. Only one is used.', 'warn');
                 return;
             }
             def = { type: 'camera', x: 0.63, y: 0.42, sensitivity: 1, zone: 0.3, releaseDelay: 300 };
@@ -330,9 +330,9 @@ export class KeymapEditor {
         };
         if (button) {
             button.classList.add('listening');
-            button.textContent = 'Pritisni taster...';
+            button.textContent = 'Press a key...';
         } else {
-            toast('Pritisni taster (ili klikni mišem na video) za novo dugme. Esc = otkaži', 'info', 3000);
+            toast('Press a key (or click the video) for the new button. Esc cancels.', 'info', 3000);
         }
     }
 
@@ -376,48 +376,48 @@ export class KeymapEditor {
         const profile = this.profile;
 
         if (this.selected < 0 || !profile.controls[this.selected]) {
-            panel.appendChild(h('h4', 'Profil'));
+            panel.appendChild(h('h4', 'Profile'));
             const name = h('input.input', { value: profile.name || '' });
             name.addEventListener('input', () => {
                 profile.name = name.value;
                 this.dirty = true;
             });
-            panel.appendChild(h('div.field', h('label', 'Naziv'), name));
-            panel.appendChild(this.slider('Osetljivost miša', profile.mouse.sensitivity || 1, 0.1, 5, 0.05,
+            panel.appendChild(h('div.field', h('label', 'Name'), name));
+            panel.appendChild(this.slider('Mouse sensitivity', profile.mouse.sensitivity || 1, 0.1, 5, 0.05,
                 (v) => { profile.mouse.sensitivity = v; }, (v) => v.toFixed(2)));
             const invert = h('input', { type: 'checkbox', checked: !!profile.mouse.invertY });
             invert.addEventListener('change', () => {
                 profile.mouse.invertY = invert.checked;
                 this.dirty = true;
             });
-            panel.appendChild(h('label.check', invert, h('span', 'Obrni vertikalno (Y) kretanje miša')));
-            panel.appendChild(h('div.field', h('label', 'Taster za kursor (oslobađa miš za klik po meniju)'),
+            panel.appendChild(h('label.check', invert, h('span', 'Invert vertical (Y) mouse movement')));
+            panel.appendChild(h('div.field', h('label', 'Cursor key (frees the mouse to click menus)'),
                 this.keyButton(profile, 'cursorKey')));
             panel.appendChild(h('p.small.muted',
-                'Klikni na oznaku da je izmeniš, prevuci je da je pomeriš. Postavi oznake tačno iznad dugmadi u igri. ',
-                h('br'), 'Delete = obriši izabranu, Esc = zatvori.'));
+                'Click a marker to edit it, drag it to move it. Place the markers exactly over the buttons in the game. ',
+                h('br'), 'Delete removes the selected one, Esc closes.'));
             return;
         }
 
         const def = profile.controls[this.selected];
         if (def.type === 'button') {
-            panel.appendChild(h('h4', 'Dugme'));
-            panel.appendChild(h('div.field', h('label', 'Taster'), this.keyButton(def, 'key')));
+            panel.appendChild(h('h4', 'Button'));
+            panel.appendChild(h('div.field', h('label', 'Key'), this.keyButton(def, 'key')));
             const mode = h('select.input',
-                h('option', { value: 'hold', selected: def.mode !== 'tap' }, 'Drži (dok je taster pritisnut)'),
-                h('option', { value: 'tap', selected: def.mode === 'tap' }, 'Dodir (kratak klik)'));
+                h('option', { value: 'hold', selected: def.mode !== 'tap' }, 'Hold (while the key is down)'),
+                h('option', { value: 'tap', selected: def.mode === 'tap' }, 'Tap (short press)'));
             mode.addEventListener('change', () => {
                 def.mode = mode.value;
                 this.dirty = true;
             });
-            panel.appendChild(h('div.field', h('label', 'Način'), mode));
-            const label = h('input.input', { value: def.label || '', placeholder: 'npr. Skok' });
+            panel.appendChild(h('div.field', h('label', 'Mode'), mode));
+            const label = h('input.input', { value: def.label || '', placeholder: 'e.g. Jump' });
             label.addEventListener('input', () => {
                 def.label = label.value;
                 this.dirty = true;
             });
             label.addEventListener('change', () => this.render());
-            panel.appendChild(h('div.field', h('label', 'Opis (opciono)'), label));
+            panel.appendChild(h('div.field', h('label', 'Label (optional)'), label));
             const drag = h('input', { type: 'checkbox', checked: !!def.drag });
             drag.addEventListener('change', () => {
                 def.drag = drag.checked;
@@ -427,39 +427,39 @@ export class KeymapEditor {
                 }
                 this.dirty = true;
             });
-            panel.appendChild(h('label.check', drag, h('span.check-text', 'Miš pomera ovo dugme dok ga držiš',
-                h('small', 'Za „slobodan pogled“ (oko 👁 u PUBG-u) i slično.'))));
+            panel.appendChild(h('label.check', drag, h('span.check-text', 'The mouse moves this button while you hold it',
+                h('small', 'For "free look" (the 👁 eye in PUBG) and similar.'))));
         } else if (def.type === 'joystick') {
-            panel.appendChild(h('h4', 'Džojstik (kretanje)'));
+            panel.appendChild(h('h4', 'Joystick (movement)'));
             panel.appendChild(h('div.row',
-                h('div.field', h('label', 'Napred'), this.keyButton(def, 'up')),
-                h('div.field', h('label', 'Nazad'), this.keyButton(def, 'down'))));
+                h('div.field', h('label', 'Forward'), this.keyButton(def, 'up')),
+                h('div.field', h('label', 'Back'), this.keyButton(def, 'down'))));
             panel.appendChild(h('div.row',
-                h('div.field', h('label', 'Levo'), this.keyButton(def, 'left')),
-                h('div.field', h('label', 'Desno'), this.keyButton(def, 'right'))));
-            panel.appendChild(h('div.field', h('label', 'Trčanje (dalje pomeranje džojstika)'), this.keyButton(def, 'sprint')));
-            panel.appendChild(this.slider('Poluprečnik', def.radius || 0.1, 0.03, 0.3, 0.005,
+                h('div.field', h('label', 'Left'), this.keyButton(def, 'left')),
+                h('div.field', h('label', 'Right'), this.keyButton(def, 'right'))));
+            panel.appendChild(h('div.field', h('label', 'Sprint (pushes the joystick further)'), this.keyButton(def, 'sprint')));
+            panel.appendChild(this.slider('Radius', def.radius || 0.1, 0.03, 0.3, 0.005,
                 (v) => { def.radius = v; }, (v) => Math.round(v * 100) + '%'));
-            panel.appendChild(this.slider('Trčanje: koliko dalje', def.sprintScale || 1.6, 1, 2.5, 0.05,
+            panel.appendChild(this.slider('Sprint: how much further', def.sprintScale || 1.6, 1, 2.5, 0.05,
                 (v) => { def.sprintScale = v; }, (v) => v.toFixed(2) + '×'));
-            panel.appendChild(h('p.small.muted', 'Postavi centar na sredinu džojstika u igri.'));
+            panel.appendChild(h('p.small.muted', 'Place the center on the middle of the game joystick.'));
         } else if (def.type === 'camera') {
-            panel.appendChild(h('h4', 'Kamera (miš)'));
-            panel.appendChild(this.slider('Osetljivost', def.sensitivity || 1, 0.1, 5, 0.05,
+            panel.appendChild(h('h4', 'Camera (mouse)'));
+            panel.appendChild(this.slider('Sensitivity', def.sensitivity || 1, 0.1, 5, 0.05,
                 (v) => { def.sensitivity = v; }, (v) => v.toFixed(2)));
-            panel.appendChild(this.slider('Veličina zone', def.zone || 0.3, 0.1, 0.5, 0.01,
+            panel.appendChild(this.slider('Zone size', def.zone || 0.3, 0.1, 0.5, 0.01,
                 (v) => { def.zone = v; }, (v) => Math.round(v * 100) + '%'));
-            panel.appendChild(this.slider('Pusti prst posle mirovanja', def.releaseDelay || 300, 80, 1500, 10,
+            panel.appendChild(this.slider('Lift the finger after idle', def.releaseDelay || 300, 80, 1500, 10,
                 (v) => { def.releaseDelay = v; }, (v) => v + ' ms'));
-            panel.appendChild(h('p.small.muted', 'Postavi na prazan deo ekrana (bez dugmadi), gde prevlačenje prstom okreće kameru.'));
+            panel.appendChild(h('p.small.muted', 'Place it on an empty part of the screen (no buttons), where swiping turns the camera.'));
         }
         panel.appendChild(h('div.row',
-            h('button.btn.btn-sm.btn-danger', { onclick: () => this.deleteSelected() }, '🗑 Obriši'),
+            h('button.btn.btn-sm.btn-danger', { onclick: () => this.deleteSelected() }, '🗑 Delete'),
             h('button.btn.btn-sm', {
                 onclick: () => {
                     this.selected = -1;
                     this.render();
                 },
-            }, 'Gotovo')));
+            }, 'Done')));
     }
 }

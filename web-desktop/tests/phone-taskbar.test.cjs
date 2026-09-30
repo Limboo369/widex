@@ -116,13 +116,13 @@ test('refresh restores only the same phone session; disconnect clears persisted 
     assert.equal(restored.dock.items.size, 0);
     s.dock.clear();
     assert.equal(s.container.children.length, 0);
-    assert.equal(s.storage.has('widex.phoneApps'), false);
+    assert.equal(s.storage.has('beam.phoneApps'), false);
     assert.equal(s.app.windows.hidePhoneTaskbarItem, false);
 });
 
 test('foreground apps are deduplicated and system surfaces are excluded unless explicitly opened', async () => {
     const s = await setup();
-    const system = { package: 'com.android.settings', label: 'Podešavanja telefona', system: true };
+    const system = { package: 'com.android.settings', label: 'Phone settings', system: true };
     s.app.appsMenu.apps.push(system);
     s.dock.onForeground(system.package);
     assert.equal(s.dock.items.size, 0);

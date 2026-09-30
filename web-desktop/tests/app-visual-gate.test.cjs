@@ -28,7 +28,7 @@ test('old frames cannot reveal a new app; a fresh frame after target confirmatio
 test('a different foreground cancels frame readiness; timeout rejects instead of showing stale content', async () => {
     const { AppVisualGate } = await modulePromise;
     const gate = new AppVisualGate('target', () => {}, { settleMs: 0, timeoutMs: 25 });
-    const rejected = assert.rejects(gate.promise, /Telefon još nije prikazao/);
+    const rejected = assert.rejects(gate.promise, /The phone has not shown the new app yet/);
     gate.onForeground('target');
     await new Promise(resolve => setTimeout(resolve, 5));
     gate.onForeground('old');
@@ -40,7 +40,7 @@ test('disconnect cancels the wait and its frame request', async () => {
     const { AppVisualGate } = await modulePromise;
     let requests = 0;
     const gate = new AppVisualGate('target', () => requests++, { settleMs: 10, timeoutMs: 500 });
-    const rejected = assert.rejects(gate.promise, /Veza je prekinuta/);
+    const rejected = assert.rejects(gate.promise, /Disconnected/);
     gate.onForeground('target');
     gate.cancel();
     await rejected;

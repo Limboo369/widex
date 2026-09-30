@@ -1,30 +1,31 @@
 'use strict';
 
 /**
- * Automatic updates: on start, look for a newer Wi-Dex on GitHub Releases (Limboo369/widex).
+ * Automatic updates: on start, look for a newer Beam on GitHub Releases (Limboo369/widex).
  * Nothing is downloaded without asking: the user confirms the download and the restart.
  *
  * Local test (unpackaged app only):
- *   WIDEX_UPDATE_URL=http://127.0.0.1:8765/  folder with latest.yml + Wi-Dex-Setup-<version>.exe
- *   WIDEX_PRETEND_VERSION=2.0.0              pretend to be an older version
+ *   BEAM_UPDATE_URL=http://127.0.0.1:8765/   folder with latest.yml + Beam-Setup-<version>.exe
+ *   BEAM_PRETEND_VERSION=2.0.0               pretend to be an older version
  */
 
 const { app, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const { APP_NAME } = require('../lib/brand');
 
 const CHECK_DELAY_MS = 5000;
 
 function configureLocalTest() {
-    const url = process.env.WIDEX_UPDATE_URL;
+    const url = process.env.BEAM_UPDATE_URL;
     if (app.isPackaged || !url) {
         return false;
     }
     autoUpdater.forceDevUpdateConfig = true;
     autoUpdater.setFeedURL({ provider: 'generic', url });
-    if (process.env.WIDEX_PRETEND_VERSION) {
+    if (process.env.BEAM_PRETEND_VERSION) {
         // electron-updater's own semver copy (instanceof checks)
         const { SemVer } = require(require.resolve('semver', { paths: [require.resolve('electron-updater')] }));
-        autoUpdater.currentVersion = new SemVer(process.env.WIDEX_PRETEND_VERSION);
+        autoUpdater.currentVersion = new SemVer(process.env.BEAM_PRETEND_VERSION);
     }
     return true;
 }
@@ -39,8 +40,8 @@ function initAutoUpdate(getWindow) {
     autoUpdater.on('update-available', async (info) => {
         const { response } = await dialog.showMessageBox(getWindow(), {
             type: 'info',
-            title: 'Wi-Dex',
-            message: 'Wi-Dex ' + info.version + ' is available',
+            title: APP_NAME,
+            message: APP_NAME + ' ' + info.version + ' is available',
             detail: 'Current version: ' + autoUpdater.currentVersion.version
                 + '\n\nIt downloads in the background, so you can keep playing.',
             buttons: ['Download', 'Later'],
@@ -67,9 +68,9 @@ function initAutoUpdate(getWindow) {
         }
         const { response } = await dialog.showMessageBox(win, {
             type: 'info',
-            title: 'Wi-Dex',
-            message: 'Wi-Dex ' + info.version + ' is ready to install',
-            detail: 'Restart now, or it will be installed the next time you close Wi-Dex.',
+            title: APP_NAME,
+            message: APP_NAME + ' ' + info.version + ' is ready to install',
+            detail: 'Restart now, or it will be installed the next time you close ' + APP_NAME + '.',
             buttons: ['Restart now', 'Later'],
             defaultId: 0,
             cancelId: 1,

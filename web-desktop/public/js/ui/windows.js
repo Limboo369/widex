@@ -4,7 +4,7 @@
 import { h } from '../util/dom.js';
 import { icon } from './icons.js';
 
-const STORAGE_KEY = 'widex.windows';
+const STORAGE_KEY = 'beam.windows';
 
 function loadGeometry() {
     try {
@@ -93,9 +93,9 @@ export class WindowManager {
         // macOS-style "traffic lights" on the left, title in the middle
         const header = h('div.window-header',
             h('div.window-controls',
-                h('button.win-btn.win-close', { title: 'Zatvori', 'aria-label': 'Zatvori' }, icon('close')),
-                h('button.win-btn.win-min', { title: 'Umanji', 'aria-label': 'Umanji' }, icon('minus')),
-                h('button.win-btn.win-max', { title: 'Uvećaj', 'aria-label': 'Uvećaj' }, icon('fullscreen'))),
+                h('button.win-btn.win-close', { title: 'Close', 'aria-label': 'Close' }, icon('close')),
+                h('button.win-btn.win-min', { title: 'Minimize', 'aria-label': 'Minimize' }, icon('minus')),
+                h('button.win-btn.win-max', { title: 'Maximize', 'aria-label': 'Maximize' }, icon('fullscreen'))),
             h('div.window-title', h('span', options.icon || '🗔'), titleText),
             h('div.window-header-end'));
         const body = h('div.window-body');

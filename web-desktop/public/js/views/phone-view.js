@@ -8,6 +8,7 @@ import { androidKeycode, metaState, keyName, AKEY } from '../input/keycodes.js';
 import { GameMapper } from '../input/game-mapper.js';
 import { KeymapEditor, renderMarkers } from '../input/keymap-editor.js';
 import { api } from '../api.js';
+import { APP_NAME } from '../brand.js';
 
 const MOUSE_POINTER_ID = 1;
 
@@ -22,7 +23,7 @@ export class PhoneView {
         this.cursorMode = false;
         this.pointerLocked = false;
         this.wantPointerLock = false;
-        this.showMarkers = localStorage.getItem('widex.showMarkers') !== '0';
+        this.showMarkers = localStorage.getItem('beam.showMarkers') !== '0';
         this.profile = null;
         this.profilePackage = null;
         this.pressed = new Set();
@@ -38,7 +39,7 @@ export class PhoneView {
                 this.layout();
             },
             onRequestKeyframe: () => this.app.send({ t: 'keyframe' }),
-            onError: (message) => this.showMessage('⚠️ Problem sa videom', message),
+            onError: (message) => this.showMessage('⚠️ Video problem', message),
             onFrame: () => {
                 this.app.phoneApps?.onVideoFrame();
                 if (!this.firstFrameShown) {
@@ -77,7 +78,7 @@ export class PhoneView {
 
         this.installInput();
         this.statsTimer = setInterval(() => this.updateStats(), 1000);
-        this.showMessage('Povezivanje...', 'Čekam sliku sa telefona.', true);
+        this.showMessage('Connecting...', 'Waiting for the phone screen.', true);
     }
 
     // ------------------------------------------------------------------ DOM
@@ -87,20 +88,20 @@ export class PhoneView {
             const button = h('button.tool-btn', { title, onclick }, icon, label ? h('span', label) : null);
             return button;
         };
-        this.btnGame = tool('🎮', 'Igra', 'Režim igre: tastatura i miš kao kontrole (F8)', () => this.toggleGameMode());
-        this.btnKeymap = tool('⌨️', 'Mapiranje', 'Podesi tastere za ovu igru (F9)', () => this.openEditor());
-        this.btnMarkers = tool('👁', '', 'Prikaži/sakrij oznake tastera preko igre', () => this.toggleMarkers());
-        this.btnScreen = tool('💡', '', 'Ugasi/upali ekran telefona (igra nastavlja da radi)', () => this.toggleScreen());
-        this.btnAudio = tool('🔊', '', 'Zvuk sa telefona', () => this.app.toggleMute());
+        this.btnGame = tool('🎮', 'Game', 'Game mode: keyboard and mouse as controls (F8)', () => this.toggleGameMode());
+        this.btnKeymap = tool('⌨️', 'Keymap', 'Set up keys for this game (F9)', () => this.openEditor());
+        this.btnMarkers = tool('👁', '', 'Show/hide key markers over the game', () => this.toggleMarkers());
+        this.btnScreen = tool('💡', '', 'Turn the phone screen off/on (the game keeps running)', () => this.toggleScreen());
+        this.btnAudio = tool('🔊', '', 'Phone sound', () => this.app.toggleMute());
         this.btnFullscreen = tool('⤢', '', 'App fullscreen: phone screen only (F10)', () => this.toggleFullscreen());
         this.statsEl = h('div.stream-stats');
 
         this.toolbar = h('div.phone-toolbar',
-            tool('◀', '', 'Nazad (desni klik)', () => this.pressKey(AKEY.BACK)),
-            tool('●', '', 'Početni ekran (srednji klik)', () => this.pressKey(AKEY.HOME)),
-            tool('▢', '', 'Nedavne aplikacije', () => this.pressKey(AKEY.APP_SWITCH)),
-            tool('🔔', '', 'Obaveštenja', () => this.app.send({ t: 'notifications' })),
-            tool(icon('rotate'), '', 'Rotiraj telefon', () => this.app.send({ t: 'rotate' })),
+            tool('◀', '', 'Back (right click)', () => this.pressKey(AKEY.BACK)),
+            tool('●', '', 'Home (middle click)', () => this.pressKey(AKEY.HOME)),
+            tool('▢', '', 'Recent apps', () => this.pressKey(AKEY.APP_SWITCH)),
+            tool('🔔', '', 'Notifications', () => this.app.send({ t: 'notifications' })),
+            tool(icon('rotate'), '', 'Rotate the phone', () => this.app.send({ t: 'rotate' })),
             this.btnScreen,
             this.btnAudio,
             h('div.sep'),
@@ -253,16 +254,16 @@ export class PhoneView {
         }
         this.exitGameInput();
         this.firstFrameShown = false;
-        this.showMessage('Veza sa telefonom je prekinuta', reason || '', false, [
-            { label: '🔄 Poveži ponovo', primary: true, onClick: () => this.app.reconnect() },
-            { label: '📶 Povezivanje', onClick: () => this.app.openConnect() },
+        this.showMessage('Disconnected from the phone', reason || '', false, [
+            { label: '🔄 Reconnect', primary: true, onClick: () => this.app.reconnect() },
+            { label: '📶 Connect', onClick: () => this.app.openConnect() },
         ]);
         this.updateButtons();
     }
 
     onStreamStarting() {
         this.firstFrameShown = false;
-        this.showMessage('Povezivanje...', 'Čekam sliku sa telefona.', true);
+        this.showMessage('Connecting...', 'Waiting for the phone screen.', true);
     }
 
     updateStats() {
@@ -283,7 +284,7 @@ export class PhoneView {
         this.btnMarkers.classList.toggle('active', this.showMarkers);
         const screenOn = this.app.session ? this.app.session.screenOn !== false : true;
         this.btnScreen.classList.toggle('warn', !screenOn);
-        this.btnScreen.title = screenOn ? 'Ugasi ekran telefona (igra nastavlja da radi)' : 'Upali ekran telefona';
+        this.btnScreen.title = screenOn ? 'Turn the phone screen off (the game keeps running)' : 'Turn the phone screen on';
         this.btnAudio.replaceChildren(icon(this.app.muted ? 'muted' : 'volume'));
     }
 
@@ -301,13 +302,13 @@ export class PhoneView {
 
     toggleMarkers() {
         this.showMarkers = !this.showMarkers;
-        localStorage.setItem('widex.showMarkers', this.showMarkers ? '1' : '0');
+        localStorage.setItem('beam.showMarkers', this.showMarkers ? '1' : '0');
         this.renderMarkers();
         this.updateButtons();
     }
 
     toggleFullscreen() {
-        // only this window; Wi-Dex over the whole screen (F11) stays underneath if it is on
+        // only this window; Beam over the whole screen (F11) stays underneath if it is on
         if (document.fullscreenElement === this.element) {
             document.exitFullscreen().catch(() => {});
             return;
@@ -318,8 +319,8 @@ export class PhoneView {
                 navigator.keyboard.lock().catch(() => {});
             }
             this.stage.focus();
-            toast('App fullscreen. Press F10 to return to Wi-Dex.', 'info', 3000);
-        }).catch((e) => toast('Ceo ekran nije dozvoljen: ' + e.message, 'warn'));
+            toast('App fullscreen. Press F10 to return to ' + APP_NAME + '.', 'info', 3000);
+        }).catch((e) => toast('Fullscreen is not allowed: ' + e.message, 'warn'));
     }
 
     // ------------------------------------------------------------------ game mode
@@ -420,7 +421,7 @@ export class PhoneView {
         }
         if (!profile) {
             const preset = this.app.presets.find((p) => p.id === 'fps') || this.app.presets[0];
-            profile = preset ? JSON.parse(JSON.stringify(preset)) : { name: 'Prazan', controls: [] };
+            profile = preset ? JSON.parse(JSON.stringify(preset)) : { name: 'Empty', controls: [] };
             profile.isPreset = true;
         }
         this.profile = profile;
@@ -438,7 +439,7 @@ export class PhoneView {
         }
         if (this.gameMode && pkg && pkg !== this.profilePackage) {
             await this.loadProfileFor(pkg);
-            toast('Profil tastera: ' + (this.profile.name || pkg), 'info', 2500);
+            toast('Key profile: ' + (this.profile.name || pkg), 'info', 2500);
         }
     }
 
@@ -447,7 +448,7 @@ export class PhoneView {
             return;
         }
         if (!this.player.width) {
-            toast('Sačekaj da se pojavi slika sa telefona', 'warn');
+            toast('Wait for the phone screen to appear', 'warn');
             return;
         }
         if (document.pointerLockElement === this.stage) {
@@ -457,8 +458,8 @@ export class PhoneView {
         this.mapper.releaseAll();
         await this.ensureProfile();
         const pkg = this.app.foregroundPackage();
-        const label = this.app.appLabel(pkg) || pkg || 'podrazumevani profil';
-        this.editor.open(this.profile, 'Mapiranje: ' + label);
+        const label = this.app.appLabel(pkg) || pkg || 'default profile';
+        this.editor.open(this.profile, 'Keymap: ' + label);
         this.updateHud();
     }
 
@@ -483,11 +484,11 @@ export class PhoneView {
         hud.classList.remove('hidden');
         const cursorKey = keyName(this.mapper.getCursorKey());
         if (this.cursorMode) {
-            hud.replaceChildren(iconText('🖱️ Kursor slobodan — pritisni ' + cursorKey + ' za povratak u igru'));
+            hud.replaceChildren(iconText('🖱️ Cursor free: press ' + cursorKey + ' to return to the game'));
         } else if (!this.pointerLocked) {
-            hud.replaceChildren(iconText('🎮 Klikni na sliku da miš kontroliše igru'));
+            hud.replaceChildren(iconText('🎮 Click the screen to control the game with the mouse'));
         } else {
-            hud.replaceChildren(iconText('🎮 ' + (this.profile ? this.profile.name : '') + ' — ' + cursorKey + ' kursor · F9 mapiranje · F8 izlaz'));
+            hud.replaceChildren(iconText('🎮 ' + (this.profile ? this.profile.name : '') + ' · ' + cursorKey + ' cursor · F9 keymap · F8 exit'));
             this.hudTimer = setTimeout(() => hud.classList.add('faded'), 3500);
         }
     }

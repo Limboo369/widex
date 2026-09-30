@@ -1,7 +1,7 @@
 {
-  "name": "wi-dex",
+  "name": "beam",
   "version": "2.0.1",
-  "description": "Wi-Dex: igraj Android igre sa PC-a (mis + tastatura) preko Wi-Fi-ja. Pixel/Android telefon -> PC browser ili Windows aplikacija.",
+  "description": "Beam: play Android games on your PC (mouse + keyboard) over Wi-Fi. Pixel/Android phone -> PC browser or Windows app.",
   "main": "app/main.js",
   "scripts": {
     "start": "node server.js --open",
@@ -33,8 +33,8 @@
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "com.widex.desktop",
-    "productName": "Wi-Dex",
+    "appId": "com.beam.desktop",
+    "productName": "Beam",
     "copyright": "Darko",
     "directories": {
       "output": "dist/installer"
@@ -59,7 +59,7 @@
     "win": {
       "target": "nsis",
       "icon": "app/icon.ico",
-      "executableName": "Wi-Dex"
+      "executableName": "Beam"
     },
     "nsis": {
       "oneClick": false,
@@ -67,8 +67,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Wi-Dex",
-      "artifactName": "Wi-Dex-Setup-${version}.${ext}",
+      "shortcutName": "Beam",
+      "artifactName": "Beam-Setup-${version}.${ext}",
       "installerIcon": "app/icon.ico",
       "uninstallerIcon": "app/icon.ico"
     },

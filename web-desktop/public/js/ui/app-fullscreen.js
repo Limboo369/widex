@@ -1,14 +1,15 @@
 /**
- * Wi-Dex over the whole screen (F11): the whole desktop goes fullscreen, like any Windows app.
+ * Beam over the whole screen (F11): the whole desktop goes fullscreen, like any Windows app.
  * Not the same as an Android app window in fullscreen (F10), which shows only the phone screen;
- * that one stacks on top of this, so leaving it returns to Wi-Dex in fullscreen.
+ * that one stacks on top of this, so leaving it returns to Beam in fullscreen.
  */
 import { toast } from '../util/dom.js';
+import { APP_NAME } from '../brand.js';
 
 export class AppFullscreen {
     constructor() {
         this.onChange = null;
-        // Wi-Dex itself is fullscreen (an app window may be fullscreen on top of it)
+        // Beam itself is fullscreen (an app window may be fullscreen on top of it)
         this.active = false;
         // capture: runs before the phone view, so F11 never reaches the game
         window.addEventListener('keydown', (e) => this.onKey(e), true);
@@ -26,12 +27,12 @@ export class AppFullscreen {
                 }
                 if (!this.active) {
                     this.active = true;
-                    toast('Wi-Dex is fullscreen. Press F11 to exit.', 'info', 3000);
+                    toast(APP_NAME + ' is fullscreen. Press F11 to exit.', 'info', 3000);
                 }
             } else if (!document.fullscreenElement) {
                 this.active = false;
             }
-            document.body.classList.toggle('widex-fullscreen', this.active);
+            document.body.classList.toggle('beam-fullscreen', this.active);
             if (this.onChange) {
                 this.onChange(this.active);
             }
@@ -65,7 +66,7 @@ export class AppFullscreen {
         }
     }
 
-    /** Leaves every fullscreen level (an app window on top of Wi-Dex too). */
+    /** Leaves every fullscreen level (an app window on top of Beam too). */
     async exit() {
         for (let i = 0; i < 3 && document.fullscreenElement; i++) {
             await document.exitFullscreen().catch(() => {});

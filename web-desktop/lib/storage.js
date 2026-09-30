@@ -2,21 +2,38 @@
 
 /**
  * Persistent data (settings, key mapping profiles, app list cache), shared by the browser version and the Windows app:
- *   Windows: %APPDATA%\Wi-Dex      other: ~/.config/wi-dex      (override: WIDEX_DATA_DIR)
+ *   Windows: %APPDATA%\Beam      other: ~/.config/beam      (override: BEAM_DATA_DIR)
+ * Data from the old name (Wi-Dex) is copied over on the first start.
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { DATA_DIR_NAME, LEGACY_DATA_DIR_NAME } = require('./brand');
+
+function defaultDataDir(name) {
+    if (process.platform === 'win32' && process.env.APPDATA) {
+        return path.join(process.env.APPDATA, name);
+    }
+    return path.join(os.homedir(), '.config', name.toLowerCase());
+}
 
 function getDataDir() {
-    if (process.env.WIDEX_DATA_DIR) {
-        return process.env.WIDEX_DATA_DIR;
+    if (process.env.BEAM_DATA_DIR) {
+        return process.env.BEAM_DATA_DIR;
     }
-    if (process.platform === 'win32' && process.env.APPDATA) {
-        return path.join(process.env.APPDATA, 'Wi-Dex');
+    const dir = defaultDataDir(DATA_DIR_NAME);
+    // profiles and settings saved before the rename (the Electron cache in "electron" is not needed)
+    const legacy = defaultDataDir(LEGACY_DATA_DIR_NAME);
+    const fresh = !fs.existsSync(path.join(dir, 'config.json')) && !fs.existsSync(path.join(dir, 'profiles'));
+    if (fresh && fs.existsSync(legacy)) {
+        try {
+            fs.cpSync(legacy, dir, { recursive: true, force: false, filter: (src) => path.relative(legacy, src) !== 'electron' });
+        } catch (e) {
+            // start with empty data
+        }
     }
-    return path.join(os.homedir(), '.config', 'wi-dex');
+    return dir;
 }
 
 const DATA_DIR = getDataDir();

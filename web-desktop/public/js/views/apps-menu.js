@@ -15,7 +15,7 @@ export class AppsMenu {
         this.apps = [];
         this.serial = null;
         this.loading = false;
-        this.showSystem.checked = localStorage.getItem('widex.showSystemApps') === '1';
+        this.showSystem.checked = localStorage.getItem('beam.showSystemApps') === '1';
 
         this.search.addEventListener('input', () => this.render());
         this.search.addEventListener('keydown', (e) => {
@@ -29,7 +29,7 @@ export class AppsMenu {
             }
         });
         this.showSystem.addEventListener('change', () => {
-            localStorage.setItem('widex.showSystemApps', this.showSystem.checked ? '1' : '0');
+            localStorage.setItem('beam.showSystemApps', this.showSystem.checked ? '1' : '0');
             this.render();
         });
         $('#btn-refresh-apps').addEventListener('click', () => this.load(true));
@@ -89,7 +89,7 @@ export class AppsMenu {
             return;
         }
         this.loading = true;
-        this.message.replaceChildren(h('span.spinner'), ' Učitavam aplikacije sa telefona...');
+        this.message.replaceChildren(h('span.spinner'), ' Loading apps from the phone...');
         try {
             const data = await api.apps(serial, refresh);
             if (this.app.currentSerial() !== serial) {
@@ -100,7 +100,7 @@ export class AppsMenu {
             this.serial = serial;
             this.app.phoneApps.refreshMetadata();
         } catch (e) {
-            this.message.textContent = 'Greška: ' + e.message;
+            this.message.textContent = 'Error: ' + e.message;
             this.loading = false;
             return;
         }
@@ -118,9 +118,9 @@ export class AppsMenu {
         const serial = this.app.currentSerial();
         if (!serial) {
             this.message.replaceChildren(h('div.apps-empty',
-                h('div.view-intro-icon', '📱'), h('h3', 'Tvoje aplikacije stižu s telefonom.'),
-                h('p', 'Poveži uređaj i otvori svoje igre i aplikacije ovdje.'),
-                h('button.btn.btn-primary', { onclick: () => { this.hide(); this.app.openConnect(); } }, '📶 Poveži telefon')));
+                h('div.view-intro-icon', '📱'), h('h3', 'Your apps come with your phone.'),
+                h('p', 'Connect your phone to open its games and apps here.'),
+                h('button.btn.btn-primary', { onclick: () => { this.hide(); this.app.openConnect(); } }, '📶 Connect a phone')));
             return;
         }
         const query = this.search.value.trim().toLowerCase();
@@ -140,17 +140,17 @@ export class AppsMenu {
             const card = h('button.app-card', { title: app.package },
                 icon,
                 h('span', app.label),
-                profiles.has(app.package) ? h('span.badge-profile', '🎮 mapirano') : null);
+                profiles.has(app.package) ? h('span.badge-profile', '🎮 mapped') : null);
             card.addEventListener('click', () => this.launch(app));
             this.grid.appendChild(card);
         }
-        this.message.textContent = list.length ? '' : (this.apps.length ? 'Nema rezultata.' : '');
+        this.message.textContent = list.length ? '' : (this.apps.length ? 'No results.' : '');
     }
 
     async launch(app) {
         this.hide();
         if (await this.app.phoneApps.launch(app)) {
-            toast('Pokrećem ' + app.label, 'info', 2000);
+            toast('Starting ' + app.label, 'info', 2000);
         }
     }
 }

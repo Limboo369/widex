@@ -1,21 +1,22 @@
 'use strict';
 
 /**
- * Wi-Dex as a Windows application (Electron): same web desktop, without the browser around it.
+ * Beam as a Windows application (Electron): same web desktop, without the browser around it.
  * Advantages for games: browser shortcuts (Ctrl+W, Ctrl+R, Alt...) do not interfere, one window, starts the server itself.
  */
 
 const path = require('path');
 const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 
-// the data (profiles, settings) is shared with the browser version (%APPDATA%\Wi-Dex)
+// the data (profiles, settings) is shared with the browser version (%APPDATA%\Beam)
 const { startServer, findRunningServer } = require('../server');
 const { initAutoUpdate } = require('./updater');
+const { APP_NAME, DATA_DIR_NAME } = require('../lib/brand');
 
 const PORT = 3000;
 
 // Chromium's own files (cache, local storage...) in a subfolder, apart from the profiles and settings
-app.setPath('userData', path.join(app.getPath('appData'), 'Wi-Dex', 'electron'));
+app.setPath('userData', path.join(app.getPath('appData'), DATA_DIR_NAME, 'electron'));
 
 // smoother video: never throttle the page, use the GPU for decoding
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
@@ -48,7 +49,7 @@ async function createWindow() {
         try {
             server = await startServer({ port: PORT, host: '127.0.0.1', open: false, quiet: true });
         } catch (e) {
-            dialog.showErrorBox('Wi-Dex', 'Ne mogu da pokrenem Wi-Dex server: ' + e.message);
+            dialog.showErrorBox(APP_NAME, 'Could not start the ' + APP_NAME + ' server: ' + e.message);
             app.quit();
             return;
         }
@@ -61,7 +62,7 @@ async function createWindow() {
         height: 940,
         minWidth: 900,
         minHeight: 560,
-        title: 'Wi-Dex',
+        title: APP_NAME,
         backgroundColor: '#0b0d14',
         icon: path.join(__dirname, 'icon.png'),
         autoHideMenuBar: true,
@@ -74,7 +75,7 @@ async function createWindow() {
     mainWindow.once('ready-to-show', async () => {
         mainWindow.maximize();
         mainWindow.show();
-        // "Pokreni u punom ekranu": the same fullscreen as F11 in the page (the page needs a user gesture for it)
+        // "Start in fullscreen": the same fullscreen as F11 in the page (the page needs a user gesture for it)
         try {
             const config = await (await fetch(baseUrl + '/api/config')).json();
             if (config.startFullscreen && mainWindow) {

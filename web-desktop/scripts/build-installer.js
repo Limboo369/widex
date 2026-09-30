@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Build the Windows installer: dist/installer/Wi-Dex-Setup-<version>.exe
+ * Build the Windows installer: dist/installer/Beam-Setup-<version>.exe
  * adb (Android SDK platform-tools) is bundled so the installed app works without the SDK.
  *   npm run installer
  */
@@ -28,8 +28,8 @@ function findPlatformTools() {
 }
 
 function main() {
-    if (!fs.existsSync(path.join(ROOT, 'bin', 'widex-server.jar'))) {
-        throw new Error('bin/widex-server.jar is missing: run "npm run build-server" first');
+    if (!fs.existsSync(path.join(ROOT, 'bin', 'beam-server.jar'))) {
+        throw new Error('bin/beam-server.jar is missing: run "npm run build-server" first');
     }
     const source = findPlatformTools();
     if (!source) {

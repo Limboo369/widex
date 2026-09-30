@@ -14,8 +14,8 @@ const EventEmitter = require('events');
 const { PacketParser, DeviceMessageParser, PacketType, Codec, encodeControl } = require('./protocol');
 
 const SERVER_VERSION = '2.0.0';
-const SERVER_JAR = path.join(__dirname, '..', 'bin', 'widex-server.jar');
-const DEVICE_JAR = '/data/local/tmp/widex-server.jar';
+const SERVER_JAR = path.join(__dirname, '..', 'bin', 'beam-server.jar');
+const DEVICE_JAR = '/data/local/tmp/beam-server.jar';
 
 const CHANNEL_VIDEO = 1;
 const CHANNEL_AUDIO = 2;
@@ -188,12 +188,12 @@ class DeviceSession extends EventEmitter {
 
     async start() {
         const scid = crypto.randomBytes(4).toString('hex');
-        this.log('Pokrećem sesiju na ' + this.serial + ' (' + JSON.stringify(this.options) + ')');
+        this.log('Starting a session on ' + this.serial + ' (' + JSON.stringify(this.options) + ')');
         try {
             await this.adb.push(this.serial, SERVER_JAR, DEVICE_JAR);
-            this.port = await this.adb.forward(this.serial, 'localabstract:widex_' + scid);
+            this.port = await this.adb.forward(this.serial, 'localabstract:beam_' + scid);
 
-            const command = 'CLASSPATH=' + DEVICE_JAR + ' app_process / com.widex.server.Server ' + SERVER_VERSION + ' '
+            const command = 'CLASSPATH=' + DEVICE_JAR + ' app_process / com.beam.server.Server ' + SERVER_VERSION + ' '
                 + buildServerArgs(scid, this.options);
             this.process = this.adb.spawnShell(this.serial, command);
             this.processExited = false;
@@ -207,14 +207,14 @@ class DeviceSession extends EventEmitter {
         } catch (e) {
             const detail = this.lastServerError ? ' — ' + this.lastServerError : '';
             this.error = (e.message || String(e)) + detail;
-            this.log('Greška pri pokretanju: ' + this.error);
+            this.log('Start failed: ' + this.error);
             await this.stop('start-failed');
             throw new Error(this.error);
         }
 
         this.attachSockets();
         this.state = 'running';
-        this.log('Sesija pokrenuta');
+        this.log('Session started');
         this.statsTimer = setInterval(() => this.updateStats(), 1000);
         this.batteryTimer = setInterval(() => this.updateBattery(), 30000);
         this.updateBattery();
@@ -248,14 +248,14 @@ class DeviceSession extends EventEmitter {
         this.process.stderr.on('data', handleLines(''));
         this.process.on('exit', (code) => {
             this.processExited = true;
-            this.log('Server na telefonu je završio (kod ' + code + ')');
+            this.log('The phone server exited (code ' + code + ')');
             if (this.state === 'running') {
                 this.stop('server-exited');
             }
         });
         this.process.on('error', (e) => {
             this.processExited = true;
-            this.log('adb greška: ' + e.message);
+            this.log('adb error: ' + e.message);
         });
     }
 
@@ -264,7 +264,7 @@ class DeviceSession extends EventEmitter {
         let lastError = null;
         while (Date.now() < deadline) {
             if (this.processExited) {
-                throw new Error('Server na telefonu se ugasio');
+                throw new Error('The phone server stopped');
             }
             try {
                 return await connectSocket(this.port, true);
@@ -273,7 +273,7 @@ class DeviceSession extends EventEmitter {
                 await sleep(100);
             }
         }
-        throw new Error('Nema odgovora od servera na telefonu' + (lastError ? ' (' + lastError.message + ')' : ''));
+        throw new Error('No answer from the phone server' + (lastError ? ' (' + lastError.message + ')' : ''));
     }
 
     attachSockets() {
@@ -281,7 +281,7 @@ class DeviceSession extends EventEmitter {
         this.videoSocket.on('data', (data) => videoParser.push(data));
         this.videoSocket.on('close', () => {
             if (this.state === 'running') {
-                this.log('Video veza zatvorena');
+                this.log('Video connection closed');
                 this.stop('video-closed');
             }
         });
@@ -292,7 +292,7 @@ class DeviceSession extends EventEmitter {
             this.audioSocket.on('data', (data) => audioParser.push(data));
             this.audioSocket.on('close', () => {
                 if (this.state === 'running' && !this.audioError) {
-                    this.audioError = 'Zvuk nije dostupan';
+                    this.audioError = 'Sound is not available';
                 }
             });
         }
@@ -314,7 +314,7 @@ class DeviceSession extends EventEmitter {
         switch (event.event) {
             case 'hello':
                 this.device = event;
-                this.log('Telefon: ' + event.manufacturer + ' ' + event.model + ', Android ' + event.release + ' (API ' + event.sdk + ')');
+                this.log('Phone: ' + event.manufacturer + ' ' + event.model + ', Android ' + event.release + ' (API ' + event.sdk + ')');
                 break;
             case 'foreground':
                 this.foreground = event.package ? { package: event.package, component: event.component } : null;
@@ -326,10 +326,10 @@ class DeviceSession extends EventEmitter {
                 break;
             case 'audio_error':
                 this.audioError = event.message;
-                this.log('Zvuk: ' + event.message);
+                this.log('Sound: ' + event.message);
                 break;
             case 'error':
-                this.log('Greška na telefonu: ' + event.message);
+                this.log('Phone error: ' + event.message);
                 break;
             default:
                 break;
@@ -351,7 +351,7 @@ class DeviceSession extends EventEmitter {
             this.videoConfigPacket = null;
             this.log('Video: ' + this.video.codec + ' ' + this.video.width + 'x' + this.video.height);
             for (const ws of this.viewers) {
-                ws.widex.waitingKeyframe = true;
+                ws.beam.waitingKeyframe = true;
             }
         } else if (type === PacketType.CONFIG) {
             this.videoConfigPacket = payload;
@@ -362,7 +362,7 @@ class DeviceSession extends EventEmitter {
 
         let message = null;
         for (const ws of this.viewers) {
-            const state = ws.widex;
+            const state = ws.beam;
             if (type === PacketType.DELTA && state.waitingKeyframe) {
                 continue;
             }
@@ -431,7 +431,7 @@ class DeviceSession extends EventEmitter {
     }
 
     addViewer(ws) {
-        ws.widex = { waitingKeyframe: true };
+        ws.beam = { waitingKeyframe: true };
         this.viewers.add(ws);
         clearTimeout(this.idleTimer);
         this.idleTimer = null;
@@ -487,7 +487,7 @@ class DeviceSession extends EventEmitter {
         this.idleTimer = setTimeout(() => {
             this.idleTimer = null;
             if (this.viewers.size === 0 && this.state === 'running') {
-                this.log('Nema otvorenog prikaza, zaustavljam sesiju');
+                this.log('No view is open, stopping the session');
                 this.stop('idle');
             }
         }, this.idleStopMs);
@@ -537,7 +537,7 @@ class DeviceSession extends EventEmitter {
         clearInterval(this.statsTimer);
         clearInterval(this.batteryTimer);
         clearTimeout(this.idleTimer);
-        this.log('Zaustavljam sesiju (' + reason + ')');
+        this.log('Stopping the session (' + reason + ')');
 
         for (const socket of [this.videoSocket, this.audioSocket, this.controlSocket]) {
             if (socket) {

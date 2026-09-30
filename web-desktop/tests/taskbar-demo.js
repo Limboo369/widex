@@ -26,12 +26,12 @@ const app = {
     togglePhoneScreen() {},
     async stopSession() { this.session = null; this.foreground = null; this.phoneApps.clear(); },
     openPhone() {
-        this.windows.open({ id: 'phone', title: 'Telefon · Pregled prebacivanja', icon: '📱', width: 760, height: 420,
+        this.windows.open({ id: 'phone', title: 'Phone · Switching preview', icon: '📱', width: 760, height: 420,
             onClose: () => { this.phoneApps.closeCurrent(); return true; },
             content: h('div.view',
                 h('div.view-intro', h('div.view-intro-icon', icon('phone')),
-                    h('div', h('h2', this.currentLabel || 'Telefon'), h('p', 'Simulacija · Jedan prikaz, više aplikacija u donjoj traci.'))),
-                h('div.notice.info', 'Otvori Browser, Muziku i Galeriju iz Start menija. Klikni njihove stavke u donjoj traci da promijeniš aktivnu aplikaciju.')) });
+                    h('div', h('h2', this.currentLabel || 'Phone'), h('p', 'Simulation · One view, several apps in the taskbar.'))),
+                h('div.notice.info', 'Open Browser, Music and Gallery from the Start menu. Click their taskbar items to switch the active app.')) });
     },
 };
 app.windows = new WindowManager($('#window-container'), $('#taskbar-windows'));
@@ -48,7 +48,7 @@ app.phoneApps.launch = async item => {
         app.currentLabel = item.label;
         const win = app.windows.get('phone');
         win.body.querySelector('h2').textContent = item.label;
-        win.setTitle('Telefon · ' + item.label);
+        win.setTitle('Phone · ' + item.label);
         app.phoneApps.onForeground(item.package);
     }
     return ok;
@@ -58,7 +58,7 @@ document.querySelectorAll('.desktop-icon').forEach(button => button.addEventList
     if (button.dataset.action === 'apps') app.appsMenu.toggle();
     else if (button.dataset.action === 'phone') app.openPhone();
 }));
-$('#start-device-name').textContent = 'Telefon · Simulacija';
-$('#start-device-status').textContent = 'Pregled funkcije';
-$('#desktop-connection-status').textContent = 'Simulacija · Bez povezivanja s telefonom';
+$('#start-device-name').textContent = 'Phone · Simulation';
+$('#start-device-status').textContent = 'Feature preview';
+$('#desktop-connection-status').textContent = 'Simulation · No phone connection';
 await app.appsMenu.load(false);

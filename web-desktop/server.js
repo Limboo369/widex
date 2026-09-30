@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * Wi-Dex PC server: serves the web desktop (http://localhost:3000) and bridges the browser and the phone.
+ * Beam PC server: serves the web desktop (http://localhost:3000) and bridges the browser and the phone.
  *
  *   node server.js [--port 3000] [--open]
  */
@@ -18,6 +18,7 @@ const { Adb } = require('./lib/adb');
 const { SessionManager, SERVER_VERSION, SERVER_JAR } = require('./lib/session');
 const apps = require('./lib/apps');
 const storage = require('./lib/storage');
+const { APP_NAME } = require('./lib/brand');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const APP_VERSION = require('./package.json').version;
@@ -139,7 +140,7 @@ function openBrowser(url) {
             spawn('xdg-open', [url], { detached: true, stdio: 'ignore' }).unref();
         }
     } catch (e) {
-        console.log('Otvori ručno: ' + url);
+        console.log('Open it manually: ' + url);
     }
 }
 
@@ -205,18 +206,18 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
             const address = String(body.address || '').trim();
             const code = String(body.code || '').trim();
             if (!/^[\w.\-:\[\]]+:\d+$/.test(address) || !/^\d{6}$/.test(code)) {
-                throw new Error('Unesi adresu (IP:port) i 6-cifreni kod');
+                throw new Error('Enter the address (IP:port) and the 6-digit code');
             }
-            log('Uparivanje sa ' + address);
+            log('Pairing with ' + address);
             const output = await adb.pair(address, code);
             return { output };
         },
         'POST /api/connect': async (body) => {
             const address = String(body.address || '').trim();
             if (!/^[\w.\-:\[\]]+(:\d+)?$/.test(address)) {
-                throw new Error('Neispravna adresa');
+                throw new Error('Invalid address');
             }
-            log('Povezivanje sa ' + address);
+            log('Connecting to ' + address);
             const output = await adb.connect(address);
             const config = storage.loadConfig();
             config.lastAddress = address;
@@ -228,7 +229,7 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
         'POST /api/session/start': async (body) => {
             const serial = String(body.serial || '');
             if (!serial) {
-                throw new Error('Nije izabran uređaj');
+                throw new Error('No device selected');
             }
             const config = storage.loadConfig();
             const options = Object.assign({}, config.session, body.options || {});
@@ -249,7 +250,7 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
         'GET /api/apps': async (body, url) => {
             const serial = url.searchParams.get('serial');
             if (!serial) {
-                throw new Error('Nije izabran uređaj');
+                throw new Error('No device selected');
             }
             return { apps: await apps.listApps(adb, serial, { refresh: url.searchParams.get('refresh') === '1' }) };
         },
@@ -285,7 +286,7 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
                 const pkg = decodeURIComponent(profileMatch[1]);
                 if (req.method === 'GET') {
                     const profile = storage.getProfile(pkg);
-                    sendJson(res, profile ? 200 : 404, profile || { error: 'Nema profila' });
+                    sendJson(res, profile ? 200 : 404, profile || { error: 'No profile' });
                 } else if (req.method === 'PUT') {
                     sendJson(res, 200, storage.saveProfile(pkg, body));
                 } else if (req.method === 'DELETE') {
@@ -353,17 +354,17 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
         }
     }
     if (!actualPort) {
-        throw new Error('Nema slobodnog porta od ' + port);
+        throw new Error('No free port from ' + port);
     }
 
     const url = 'http://localhost:' + actualPort;
     if (!quiet) {
         console.log('==================================================');
-        console.log(' Wi-Dex ' + APP_VERSION + ' je pokrenut');
-        console.log(' Otvori u Chrome/Edge: ' + url);
+        console.log(' ' + APP_NAME + ' ' + APP_VERSION + ' is running');
+        console.log(' Open in Chrome/Edge: ' + url);
         console.log(' adb: ' + adb.path);
-        console.log(' Podaci: ' + storage.DATA_DIR);
-        console.log(' Za izlaz pritisni Ctrl+C');
+        console.log(' Data: ' + storage.DATA_DIR);
+        console.log(' Press Ctrl+C to quit');
         console.log('==================================================');
     }
     if (open) {
@@ -379,7 +380,7 @@ async function startServer({ port = 3000, host = '127.0.0.1', open = false, quie
 }
 
 /**
- * Return the info of a Wi-Dex server already running on this port (e.g. the Windows app), or null.
+ * Return the info of a Beam server already running on this port (e.g. the Windows app), or null.
  */
 function findRunningServer(port) {
     return new Promise((resolve) => {
@@ -413,7 +414,7 @@ async function main() {
     if (running) {
         // one server per PC: reuse it (two servers would both drive the same phone)
         const url = 'http://localhost:' + args.port;
-        console.log('Wi-Dex već radi na ' + url + ' (možda kao Windows aplikacija).');
+        console.log(APP_NAME + ' is already running at ' + url + ' (maybe as the Windows app).');
         if (args.open) {
             openBrowser(url);
         }
@@ -426,14 +427,14 @@ async function main() {
                 process.exit(0);
             }
             stopping = true;
-            console.log('Zaustavljam...');
+            console.log('Stopping...');
             await instance.shutdown();
             process.exit(0);
         };
         process.on('SIGINT', stop);
         process.on('SIGTERM', stop);
     }).catch((e) => {
-        console.error('Greška: ' + e.message);
+        console.error('Error: ' + e.message);
         process.exit(1);
     });
 }

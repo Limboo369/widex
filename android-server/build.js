@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Build the Android server (widex-server.jar) without Gradle:
- *   javac (against android.jar)  ->  d8 (dex)  ->  web-desktop/bin/widex-server.jar
+ * Build the Android server (beam-server.jar) without Gradle:
+ *   javac (against android.jar)  ->  d8 (dex)  ->  web-desktop/bin/beam-server.jar
  *
  * Requirements: a JDK (Android Studio's bundled JBR works) and the Android SDK (platforms + build-tools).
  * Usage: node android-server/build.js
@@ -16,7 +16,7 @@ const ROOT = __dirname;
 const SRC_DIR = path.join(ROOT, 'src');
 const OUT_DIR = path.join(ROOT, 'out');
 const CLASSES_DIR = path.join(OUT_DIR, 'classes');
-const OUTPUT_JAR = path.join(ROOT, '..', 'web-desktop', 'bin', 'widex-server.jar');
+const OUTPUT_JAR = path.join(ROOT, '..', 'web-desktop', 'bin', 'beam-server.jar');
 const IS_WINDOWS = process.platform === 'win32';
 
 function exists(p) {
@@ -143,7 +143,7 @@ function main() {
     const classes = listClassFiles(CLASSES_DIR);
     const dexArgsFile = path.join(OUT_DIR, 'classes.txt');
     fs.writeFileSync(dexArgsFile, classes.join('\n'));
-    const tmpJar = path.join(OUT_DIR, 'widex-server.jar');
+    const tmpJar = path.join(OUT_DIR, 'beam-server.jar');
     execFileSync(java, [
         '-cp', d8Jar, 'com.android.tools.r8.D8',
         '--release',

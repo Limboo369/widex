@@ -1,158 +1,157 @@
-# Wi-Dex: Android igre na PC-u (miš + tastatura, preko Wi-Fi-ja)
+# Beam: Android games on your PC (mouse + keyboard, over Wi-Fi)
 
-Wi-Dex prikazuje ekran telefona na računaru, u browseru ili kao Windows aplikacija. Android igre možeš da igraš mišem i tastaturom: **WASD** za kretanje, **miš** za kameru, **klik** za pucanje. Sve ide preko Wi-Fi-ja, a na telefon ne treba instalirati nikakvu aplikaciju.
+Beam shows your phone screen on your PC, in a browser or as a Windows app. You can play Android games with a mouse and keyboard: **WASD** to move, the **mouse** for the camera, **click** to shoot. Everything goes over Wi-Fi, and you do not need to install any app on the phone.
 
-Pravljeno i testirano za **Pixel 7 Pro** sa najnovijim Androidom (testirano na Android 17 emulatoru, API 37).
+Built and tested for the **Pixel 7 Pro** with the latest Android (tested on an Android 17 emulator, API 37).
 
 ---
 
-## Šta dobijaš
+## What you get
 
-- 🎞️ **Slika u realnom vremenu**: telefon hardverski enkodira H.264, a browser hardverski dekodira (WebCodecs). 60 FPS (može 90/120), malo kašnjenje.
-- 🔊 **Zvuk igre na računaru** (Android 12+). Dok je Wi-Dex povezan, telefon je nem.
-- 🎮 **Pravi multitouch za igre**: istovremeno možeš da držiš W, pomeraš kameru mišem, pucaš i nišaniš.
-- ⌨️ **Editor mapiranja** (`F9`) sa šablonima (pucačine, MOBA, osnovni). Profil se čuva po igri i sam se učita kad otvoriš tu igru.
-- 💡 **Ekran telefona može da bude ugašen** dok igraš. Igra radi dalje, telefon se manje greje.
-- 🖱️ **Normalno korišćenje telefona**: klik je dodir, desni klik je Nazad, točkić skroluje. Kucanje radi, i sa š, ć, č, đ, ž. Radi i Ctrl+C / Ctrl+V između PC-a i telefona.
-- 🖥️ **Poseban desktop (eksperimentalno)**: telefon pravi dodatni 1920×1080 ekran sa taskbar-om, kao Samsung DeX. Aplikacije se otvaraju u prozorima.
-- 🔄 **Samo se ponovo poveže** ako Wi-Fi zakaže usred igre.
+- 🎞️ **Real-time picture**: the phone encodes H.264 in hardware and the browser decodes it in hardware (WebCodecs). 60 FPS (90/120 possible), low latency.
+- 🔊 **Game sound on the PC** (Android 12+). While Beam is connected, the phone is muted.
+- 🎮 **Real multitouch for games**: hold W, move the camera with the mouse, shoot and aim, all at the same time.
+- ⌨️ **Key mapping editor** (`F9`) with templates (shooter, MOBA, basic). The profile is saved per game and loads by itself when you open that game.
+- 💡 **The phone screen can stay off** while you play. The game keeps running and the phone stays cooler.
+- 🖱️ **Normal phone use**: click is a tap, right click is Back, the wheel scrolls. Typing works, including accented letters. Ctrl+C / Ctrl+V work between the PC and the phone.
+- 🖥️ **Separate desktop (experimental)**: the phone creates an extra 1920×1080 screen with a taskbar, like Samsung DeX. Apps open in windows.
+- 🔄 **Reconnects by itself** if Wi-Fi drops in the middle of a game.
 
-## Šta ti treba
+## What you need
 
 | | |
 |---|---|
-| Računar | Windows sa **Node.js** (imaš v22) i **adb** iz Android SDK (imaš preko Android Studio) |
-| Prikaz | **Windows aplikacija** (prečica `Wi-Dex`) ili **Chrome/Edge** |
-| Telefon | Android 11+ (Pixel 7 Pro ✅). Zvuk traži Android 12+ |
-| Mreža | Telefon i PC na **istoj Wi-Fi mreži**, najbolje 5 GHz |
+| PC | Windows with **Node.js** (v22) and **adb** from the Android SDK (included with Android Studio) |
+| Display | The **Windows app** (the `Beam` shortcut) or **Chrome/Edge** |
+| Phone | Android 11+ (Pixel 7 Pro ✅). Sound needs Android 12+ |
+| Network | Phone and PC on the **same Wi-Fi network**, ideally 5 GHz |
 
-## Pokretanje
+## Starting
 
-- **Prečica `Wi-Dex`** (tip „Shortcut“, sa plavom ikonicom) ili `Wi-Dex (aplikacija).bat` otvara Windows aplikaciju. Ovo se preporučuje za igre, jer prečice browsera ne smetaju: Ctrl+W neće zatvoriti prozor dok čučiš i ideš napred.
-- **`Wi-Dex (browser).bat`** otvara Wi-Dex u browseru na `http://localhost:3000`. Crni prozor (server) ostavi otvoren dok igraš.
+- **The `Beam` shortcut** or `Beam (app).bat` opens the Windows app. This is recommended for games, because browser shortcuts do not get in the way: Ctrl+W will not close the window while you crouch and move forward.
+- **`Beam (browser).bat`** opens Beam in the browser at `http://localhost:3000`. Leave the black window (the server) open while you play.
 
-Posle prvog povezivanja Wi-Dex se sam poveže na telefon čim ga pokreneš (ako je na telefonu uključeno Bežično otklanjanje grešaka).
+After the first connection, Beam connects to the phone by itself as soon as you start it (if Wireless debugging is on on the phone).
 
-## Prvo povezivanje telefona (radi se samo jednom)
+## Connecting the phone the first time (only once)
 
-1. **Uključi Opcije za programere**: *Podešavanja → O telefonu* → 7 puta dodirni **Broj verzije** (*Build number*).
-2. *Podešavanja → Sistem → Opcije za programere* → uključi **Bežično otklanjanje grešaka** (*Wireless debugging*).
-3. Uđi u **Bežično otklanjanje grešaka** → **Upari uređaj pomoću koda za uparivanje** (*Pair device with pairing code*).
-4. U Wi-Dex-u (prozor **Povezivanje**) unesi 6-cifreni kod i klikni **Upari**. Adresa telefona se obično pojavi sama. Ako se ne pojavi, prepiši *IP adresu i port* sa tog prozora na telefonu.
-5. Telefon se pojavi u listi. Klikni **▶ Pokreni**.
+1. **Turn on Developer options**: *Settings → About phone* → tap **Build number** 7 times.
+2. *Settings → System → Developer options* → turn on **Wireless debugging**.
+3. Open **Wireless debugging** → **Pair device with pairing code**.
+4. In Beam (the **Connect** window), enter the 6-digit code and click **Pair**. The phone address usually appears by itself. If it does not, copy the *IP address & Port* from that screen on the phone.
+5. The phone shows up in the list. Click **▶ Start**.
 
-> Posle restarta telefona ponovo uključi *Bežično otklanjanje grešaka*. Uparivanje ne treba ponavljati.
-> Ako se telefon ne pojavi sam, unesi *IP adresu i port* sa ekrana *Bežično otklanjanje grešaka* i klikni **Poveži**. Port se menja svaki put kad uključiš tu opciju.
-> Može i preko USB kabla (uključi *USB otklanjanje grešaka*).
+> After the phone restarts, turn *Wireless debugging* on again. You do not need to pair again.
+> If the phone does not show up by itself, enter the *IP address & Port* from the *Wireless debugging* screen and click **Connect**. The port changes every time you turn that option on.
+> A USB cable works too (turn on *USB debugging*).
 
-## Igranje
+## Playing
 
-1. Otvori igru iz menija **⚡ Start** (lista aplikacija sa telefona) ili direktno na slici.
-2. Pritisni **`F8`** (ili 🎮 Igra): tastatura i miš postaju kontrole. **Klikni na sliku** da miš „uhvati“ kameru.
-3. Prvi put pritisni **`F9`** (mapiranje). Izaberi šablon, prevuci oznake tačno preko dugmadi u igri, pa klikni **Sačuvaj**. Profil se pamti za tu igru.
-4. Taster **`` ` ``** (levo od 1) oslobađa miš za klik po menijima. Ponovo **`` ` ``** vraća miš u igru.
-5. **`F10`** je ceo ekran. U celom ekranu Esc ide igri; **drži Esc** za izlaz.
+1. Open a game from the **Games & apps** menu (the app list from the phone) or straight on the phone screen.
+2. Press **`F8`** (or 🎮 Game): the keyboard and mouse become the controls. **Click the screen** so the mouse takes over the camera.
+3. The first time, press **`F9`** (key mapping). Pick a template, drag the markers exactly over the buttons in the game, then click **Save**. The profile is remembered for that game.
+4. The **`` ` ``** key (left of 1) frees the mouse for clicking menus. Press **`` ` ``** again to return the mouse to the game.
+5. **`F10`** is app fullscreen (only the phone screen). In fullscreen Esc goes to the game; **hold Esc** to exit. **`F11`** puts the whole Beam desktop in fullscreen.
 
-### Šablon „Pucačina“ (PUBG, CoD, Free Fire...)
+### The "Shooter" template (PUBG, CoD, Free Fire...)
 
-| Taster | Radnja | Taster | Radnja |
+| Key | Action | Key | Action |
 |---|---|---|---|
-| W A S D | kretanje (džojstik) | Shift | trčanje |
-| miš | kamera | levi klik | pucaj |
-| desni klik | nišan | Space | skok |
-| C / Z | čučni / legni | R | punjenje |
-| F | uzmi | 1 / 2 | oružje |
-| G / H | bomba / lečenje | Q / E | viri levo / desno |
-| M / Tab | mapa / ranac | `` ` `` | slobodan kursor |
-| L-Alt + miš | slobodan pogled (oko 👁) | | |
+| W A S D | move (joystick) | Shift | sprint |
+| mouse | camera | left click | fire |
+| right click | aim | Space | jump |
+| C / Z | crouch / prone | R | reload |
+| F | pick up | 1 / 2 | weapon |
+| G / H | grenade / heal | Q / E | peek left / right |
+| M / Tab | map / backpack | `` ` `` | free cursor |
+| L-Alt + mouse | free look (the 👁 eye) | | |
 
-Pozicije u šablonu su približne. Uvek ih poravnaj sa svojom igrom (`F9`), jer svaka igra (i svaki raspored HUD-a) ima dugmad na drugom mestu.
+The positions in the template are approximate. Always line them up with your game (`F9`), because every game (and every HUD layout) puts its buttons somewhere else.
 
-### Vrste kontrola u editoru
+### Control types in the editor
 
-- **Dugme**: taster ili klik miša dodiruje tu tačku. *Drži* znači da prst stoji dok držiš taster. *Dodir* je kratak klik. Opcija *Miš pomera ovo dugme* služi za slobodan pogled: dok držiš taster, miš vuče to dugme umesto kamere.
-- **Džojstik**: 4 tastera pomeraju „prst“ od centra. Trčanje ga gura dalje.
-- **Kamera**: pomeranje miša prevlači „prst“ po praznom delu ekrana. Kad stigne do ivice zone, prst se podigne i vrati na početak. Postavi je na mesto gde prevlačenje okreće kameru u igri.
+- **Button**: a key or mouse click taps that spot. *Hold* keeps the finger down while you hold the key. *Tap* is a short press. The *mouse moves this button* option is for free look: while you hold the key, the mouse drags that button instead of the camera.
+- **Joystick**: 4 keys move a "finger" away from the center. Sprint pushes it further.
+- **Camera**: moving the mouse drags a "finger" across an empty part of the screen. When it reaches the edge of the zone, the finger lifts and goes back to the start. Place it where swiping turns the camera in the game.
 
-## Saveti za što manje kašnjenje
+## Tips for the lowest latency
 
-- Wi-Fi na **5 GHz** (ili 6 GHz), telefon blizu rutera, PC po mogućstvu na kablu.
-- *Podešavanja*: kvalitet **Brzo** (1280, 8 Mb/s) ako slika kasni. **Balans** (1920, 12 Mb/s) je podrazumevan.
-- Za igre koristi **Windows aplikaciju** i ceo ekran (`F10`).
-- Uključi **Ugasi ekran telefona**: telefon se manje greje, a igra radi isto.
-- Ping (📶 dole desno) pokazuje kašnjenje do telefona. Preko Wi-Fi-ja je obično 3–15 ms.
+- **5 GHz** Wi-Fi (or 6 GHz), the phone close to the router, the PC on a cable if possible.
+- *Settings*: **Fast** quality (1280, 8 Mb/s) if the picture lags. **Balanced** (1920, 12 Mb/s) is the default.
+- For games, use the **Windows app** and fullscreen (`F10`).
+- Turn on **Turn the phone screen off**: the phone stays cooler and the game runs the same.
+- The ping (📶 bottom right) shows the latency to the phone. Over Wi-Fi it is usually 3–15 ms.
 
-## Problemi i rešenja
+## Troubleshooting
 
-| Problem | Rešenje |
+| Problem | Fix |
 |---|---|
-| Telefon se ne pojavljuje | Ista Wi-Fi mreža? Isključi pa uključi *Bežično otklanjanje grešaka* ili unesi IP i port ručno. |
-| „Čeka dozvolu“ | Na telefonu prihvati „Dozvoliti otklanjanje grešaka?“ (označi *Uvek dozvoli*). |
-| Nema slike u browseru | Koristi Chrome/Edge i adresu `http://localhost:3000` (ne IP adresu), ili Windows aplikaciju. |
-| Nema zvuka | Klikni bilo gde na stranici (browser traži klik pre zvuka). Zvuk traži Android 12+. |
-| Slika seče ili kasni | *Podešavanja*: manji protok ili rezolucija. Proveri Wi-Fi signal. |
-| Kontrole promašuju | `F9` dok je igra otvorena, pa poravnaj oznake sa dugmadima. |
-| Miš se ne hvata | Klikni na sliku. U režimu igre `` ` `` menja kursor ↔ igra. |
-| Ekran telefona ostao ugašen | Pritisni dugme za napajanje dva puta. Wi-Dex ga inače sam vrati kad se veza prekine. |
-| Igra ne prihvata tastaturu | Neke igre imaju anti-cheat protiv mapiranja. Koristi na svoju odgovornost. |
+| The phone does not show up | Same Wi-Fi network? Turn *Wireless debugging* off and on, or enter the IP and port manually. |
+| "Waiting for permission" | On the phone, accept "Allow USB debugging?" (check *Always allow*). |
+| No picture in the browser | Use Chrome/Edge at `http://localhost:3000` (not the IP address), or the Windows app. |
+| No sound | Click anywhere on the page (the browser needs a click before sound). Sound needs Android 12+. |
+| The picture stutters or lags | *Settings*: lower the bitrate or resolution. Check the Wi-Fi signal. |
+| The controls miss | Press `F9` while the game is open, then line up the markers with the buttons. |
+| The mouse is not captured | Click the screen. In game mode `` ` `` switches between cursor and game. |
+| The phone screen stayed off | Press the power button twice. Beam normally turns it back on when the connection ends. |
+| The game ignores the keyboard | Some games have anti-cheat against mapping. Use it at your own risk. |
 
-*Podešavanja → Dijagnostika → Prikaži log* pokazuje šta se dešava na telefonu.
+*Settings → Diagnostics → Show log* shows what is happening on the phone.
 
-## Kako radi (tehnički)
+## How it works (technical)
 
 ```
- Telefon (Android)                          Računar (Windows)
+ Phone (Android)                            PC (Windows)
  ┌───────────────────────────────┐   adb    ┌──────────────────────────┐  WebSocket  ┌─────────────────────────┐
- │ widex-server.jar (app_process │◄────────►│ web-desktop/server.js    │◄───────────►│ Browser / Wi-Dex.exe    │
- │ sa „shell“ pravima):          │  Wi-Fi   │ (Node.js)                │  localhost  │ - WebCodecs (H.264)     │
- │ - ekran: DisplayManager →     │ (forward)│ - adb: uparivanje, veza  │             │ - AudioWorklet (zvuk)   │
- │   MediaCodec H.264 (hardver)  │          │ - pokreće server na tel. │             │ - miš/tastatura →       │
- │ - zvuk: REMOTE_SUBMIX (PCM)   │          │ - prosleđuje video/zvuk  │             │   dodiri (mapiranje)    │
- │ - dodiri: InputManager        │          │ - profili, podešavanja   │             │ - desktop, prozori      │
- │   (pravi multitouch)          │          └──────────────────────────┘             └─────────────────────────┘
- │ - gašenje ekrana, lista app   │
+ │ beam-server.jar (app_process  │◄────────►│ web-desktop/server.js    │◄───────────►│ Browser / Beam.exe      │
+ │ with "shell" permissions):    │  Wi-Fi   │ (Node.js)                │  localhost  │ - WebCodecs (H.264)     │
+ │ - screen: DisplayManager →    │ (forward)│ - adb: pairing, connect  │             │ - AudioWorklet (sound)  │
+ │   MediaCodec H.264 (hardware) │          │ - starts the phone server│             │ - mouse/keyboard →      │
+ │ - sound: REMOTE_SUBMIX (PCM)  │          │ - relays video/sound     │             │   touches (mapping)     │
+ │ - touches: InputManager       │          │ - profiles, settings     │             │ - desktop, windows      │
+ │   (real multitouch)           │          └──────────────────────────┘             └─────────────────────────┘
+ │ - screen off, app list        │
  └───────────────────────────────┘
 ```
 
-Wi-Dex koristi isti pristup kao [scrcpy](https://github.com/Genymobile/scrcpy): mali Java server se preko adb-a pošalje na telefon i pokrene sa pravima `shell` korisnika. Zato mu ne treba aplikacija na telefonu ni Accessibility. Tako može da šalje prave multitouch događaje (neophodno za igre), snima ekran bez pitanja i gasi ekran dok igra radi dalje.
+Beam uses the same approach as [scrcpy](https://github.com/Genymobile/scrcpy): a small Java server is sent to the phone over adb and started with the permissions of the `shell` user. That is why it needs no app on the phone and no Accessibility. This way it can send real multitouch events (essential for games), capture the screen without asking and turn the screen off while the game keeps running.
 
-Podaci (profili tastera, podešavanja) su u `%APPDATA%\Wi-Dex`. Dele ih browser verzija i aplikacija.
-Server na računaru sluša samo na `localhost`, pa niko drugi sa mreže ne može da upravlja telefonom.
+The data (key profiles, settings) is in `%APPDATA%\Beam`, shared by the browser version and the app. Data saved under the app's earlier name is copied over on the first start.
+The PC server listens only on `localhost`, so nobody else on the network can control the phone.
 
-## Struktura projekta
+## Project structure
 
 ```
 Pex/
-├── Wi-Dex (prečica)            otvara Windows aplikaciju (Wi-Dex.exe)
-├── Wi-Dex (aplikacija).bat     pokreće Windows aplikaciju (prvi put je napravi)
-├── Wi-Dex (browser).bat        pokreće server i otvara browser
-├── android-server/             Java server za telefon
-│   ├── build.js                build bez Gradle-a (javac + d8 iz Android SDK)
-│   └── src/com/widex/server/   video, zvuk, kontrola, pomoćne klase
+├── Beam (app).bat              starts the Windows app (builds it the first time)
+├── Beam (browser).bat          starts the server and opens the browser
+├── android-server/             Java server for the phone
+│   ├── build.js                build without Gradle (javac + d8 from the Android SDK)
+│   └── src/com/beam/server/    video, sound, control, helpers
 └── web-desktop/
     ├── server.js               Node.js server (HTTP API + WebSocket)
-    ├── lib/                    adb, sesija, protokol, aplikacije, podaci
-    ├── public/                 web interfejs (desktop, video, zvuk, režim igre, editor)
-    ├── presets/                šabloni mapiranja (pucačina, MOBA, osnovni)
-    ├── bin/widex-server.jar    izgrađen server (šalje se na telefon)
-    ├── app/                    Windows aplikacija (Electron)
-    ├── scripts/                pakovanje u .exe i instalater, ikonica
-    └── dist/                   Wi-Dex.exe i instalater (`npm run package-win`, `npm run installer`)
+    ├── lib/                    adb, session, protocol, apps, data, brand (the app name)
+    ├── public/                 web interface (desktop, video, sound, game mode, editor)
+    ├── presets/                key mapping templates (shooter, MOBA, basic)
+    ├── bin/beam-server.jar     built server (sent to the phone)
+    ├── app/                    Windows app (Electron)
+    ├── scripts/                packaging into an .exe and the installer, icon
+    └── dist/                   Beam.exe and the installer (`npm run package-win`, `npm run installer`)
 ```
 
-## Razvoj
+## Development
 
-### Pregled dizajna bez telefona
+### Design preview without a phone
 
-`cd web-desktop` pa `npm run preview-design` otvara izolovani interfejs na `http://localhost:3010`.
-Ovaj pregled ne pokreće adb, ne upravlja telefonom i ne čuva podešavanja. Za stvarni rad koristi postojeće Wi-Dex prečice.
-Novi interfejs koristi lokalne SVG ikonice i pozadinu, bez preuzimanja fontova ili drugih vizuelnih resursa.
+`cd web-desktop`, then `npm run preview-design` opens an isolated interface at `http://localhost:3010`.
+This preview does not start adb, does not control the phone and does not save settings. For real use, use the regular Beam shortcuts.
+The interface uses local icons and a local wallpaper, without downloading fonts or other visual resources.
 
-Za pregled prebacivanja između aplikacija bez telefona pokreni `node scripts/preview-design.js --taskbar-demo` iz foldera `web-desktop`.
+To preview switching between apps without a phone, run `node scripts/preview-design.js --taskbar-demo` from the `web-desktop` folder.
 
-### Više aplikacija u donjoj traci
+### Several apps in the taskbar
 
-Otvori aplikacije redom iz Start menija. Svaka dobija svoju stavku u donjoj traci; klik na stavku ponovo otvara tu aplikaciju u zajedničkom prikazu telefona. Aktivna stavka prati aplikaciju u prvom planu. Stavke se čuvaju pri osvježavanju iste sesije i uklanjaju kad prekineš vezu. Ovo su prečice za prebacivanje, a ne nezavisni video prozori ili potvrda da Android drži sve aplikacije u memoriji.
+Open apps one by one from the Start menu. Each one gets its own taskbar item; clicking the item opens that app again in the shared phone view. The active item follows the app in the foreground. The items survive a page refresh in the same session and are removed when you disconnect. These are shortcuts for switching, not independent video windows, and they do not guarantee that Android keeps every app in memory.
 
 ```bash
 node android-server/build.js
@@ -167,14 +166,15 @@ npm run server
 npm run package-win
 ```
 
-- `android-server/build.js` ponovo pravi `web-desktop/bin/widex-server.jar`. Treba mu JDK iz Android Studio i Android SDK.
-- `npm run server` pokreće server bez otvaranja browsera, a `npm run app` pokreće Electron bez pakovanja.
-- `npm run package-win` pravi `dist/Wi-Dex-win32-x64/Wi-Dex.exe`.
-- `npm run installer` pravi instalater `dist/installer/Wi-Dex-Setup-<verzija>.exe` sa ugrađenim adb-om (uzima ga iz Android SDK platform-tools), pa na drugom računaru ne treba ni Node.js ni Android SDK.
+- `android-server/build.js` rebuilds `web-desktop/bin/beam-server.jar`. It needs the JDK from Android Studio and the Android SDK.
+- `npm run server` starts the server without opening the browser, and `npm run app` starts Electron without packaging.
+- `npm run package-win` builds `dist/Beam-win32-x64/Beam.exe`.
+- `npm run installer` builds the installer `dist/installer/Beam-Setup-<version>.exe` with adb included (taken from the Android SDK platform-tools), so another PC needs neither Node.js nor the Android SDK.
+- The app name is in `web-desktop/lib/brand.js` (server and Windows app), `web-desktop/public/js/brand.js` (web page) and the `build` section of `web-desktop/package.json` (installer).
 
-Za testiranje bez telefona postoji emulator **WiDex_Test** (Android 17). Pokreće se iz Android Studio (*Device Manager*) i u Wi-Dex-u se pojavi kao 🖥️ uređaj.
-Zauzima oko 10.5 GB. Ako ti ne treba, obriši ga u Android Studio: *Device Manager* → WiDex_Test → *Delete*, pa *SDK Manager* → *SDK Platforms* → *Show Package Details* → Android 37.2 „Google Play Intel x86_64 … 16 KB Page Size“ → skini kvačicu → *Apply*.
+For testing without a phone there is an Android 17 emulator. Start it from Android Studio (*Device Manager*) and it shows up in Beam as a 🖥️ device.
+It takes about 10.5 GB. If you do not need it, delete it in Android Studio: *Device Manager* → the emulator → *Delete*, then *SDK Manager* → *SDK Platforms* → *Show Package Details* → Android 37.2 "Google Play Intel x86_64 … 16 KB Page Size" → uncheck it → *Apply*.
 
-## Stara verzija
+## The old version
 
-Prvi prototip (Android aplikacija sa MediaProjection + Accessibility) je zamenjen jer taj pristup nije mogao da pruži multitouch za igre, rad sa ugašenim ekranom ni pravi zvuk. Uklonjen je iz projekta.
+The first prototype (an Android app with MediaProjection + Accessibility) was replaced because that approach could not offer multitouch for games, running with the screen off, or real sound. It was removed from the project.

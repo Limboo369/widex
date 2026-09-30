@@ -13,8 +13,8 @@ const ADB_EXE = IS_WINDOWS ? 'adb.exe' : 'adb';
 
 function findAdb() {
     const candidates = [];
-    if (process.env.WIDEX_ADB) {
-        candidates.push(process.env.WIDEX_ADB);
+    if (process.env.BEAM_ADB) {
+        candidates.push(process.env.BEAM_ADB);
     }
     // bundled platform-tools (next to the app)
     candidates.push(path.join(__dirname, '..', 'platform-tools', ADB_EXE));
@@ -70,7 +70,7 @@ class Adb {
                     if (error) {
                         code = typeof error.code === 'number' ? error.code : -1;
                         if (error.code === 'ENOENT') {
-                            stderr = 'adb nije pronađen (' + this.path + ')';
+                            stderr = 'adb not found (' + this.path + ')';
                         } else if (error.killed) {
                             stderr = (stderr || '') + ' (timeout)';
                         }
@@ -165,7 +165,7 @@ class Adb {
         const result = await this.run(['pair', address, code], { timeout: 30000 });
         const text = (result.stdout + result.stderr).trim();
         if (result.code !== 0 || !/Successfully paired/i.test(text)) {
-            throw new AdbError(text || 'Uparivanje nije uspelo', result);
+            throw new AdbError(text || 'Pairing failed', result);
         }
         return text;
     }
@@ -174,7 +174,7 @@ class Adb {
         const result = await this.run(['connect', address], { timeout: 20000 });
         const text = (result.stdout + result.stderr).trim();
         if (!/connected to/i.test(text) || /failed|unable|cannot/i.test(text)) {
-            throw new AdbError(text || 'Povezivanje nije uspelo', result);
+            throw new AdbError(text || 'Connection failed', result);
         }
         return text;
     }

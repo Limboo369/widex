@@ -202,7 +202,7 @@ export class VideoPlayer {
         this.closeDecoder();
         this.codecString = str;
         if (!this.supported) {
-            this.fail('Ovaj browser ne podržava WebCodecs. Koristi Chrome ili Edge (i otvori http://localhost).');
+            this.fail('This browser does not support WebCodecs. Use Chrome or Edge (and open http://localhost).');
             return;
         }
         const config = {
@@ -216,7 +216,7 @@ export class VideoPlayer {
                 config.hardwareAcceleration = 'no-preference';
                 const retry = await VideoDecoder.isConfigSupported(config);
                 if (!retry.supported) {
-                    this.fail('Browser ne može da dekodira ' + str + (this.codec === 'h265' ? ' (probaj H.264 u podešavanjima)' : ''));
+                    this.fail('The browser cannot decode ' + str + (this.codec === 'h265' ? ' (try H.264 in Settings)' : ''));
                     return;
                 }
             }
@@ -230,7 +230,7 @@ export class VideoPlayer {
         try {
             this.decoder.configure(config);
         } catch (e) {
-            this.fail('Greška dekodera: ' + e.message);
+            this.fail('Decoder error: ' + e.message);
             return;
         }
         this.waitingKeyframe = true;
