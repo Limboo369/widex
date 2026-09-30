@@ -2,18 +2,55 @@
 
 /**
  * Automatic updates: on start, look for a newer Beam on GitHub Releases (Limboo369/widex).
- * Nothing is downloaded without asking: the user confirms the download and the restart.
+ * Windows: nothing is downloaded without asking, the user confirms the download and the restart.
+ * macOS: the app is not signed, so it cannot replace itself; a new version is only announced,
+ * with a button that opens the Release page for the download.
  *
  * Local test (unpackaged app only):
- *   BEAM_UPDATE_URL=http://127.0.0.1:8765/   folder with latest.yml + Beam-Setup-<version>.exe
+ *   BEAM_UPDATE_URL=http://127.0.0.1:8765/   folder with latest.yml + Beam-<version>-Windows-Setup.exe
  *   BEAM_PRETEND_VERSION=2.0.0               pretend to be an older version
  */
 
-const { app, dialog } = require('electron');
+const { app, dialog, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const { APP_NAME } = require('../lib/brand');
+const { isNewer } = require('../lib/version');
 
 const CHECK_DELAY_MS = 5000;
+const LATEST_RELEASE_API = 'https://api.github.com/repos/Limboo369/widex/releases/latest';
+
+async function notifyMacUpdate(getWindow) {
+    try {
+        const response = await fetch(LATEST_RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } });
+        if (!response.ok) {
+            return;
+        }
+        const release = await response.json();
+        const current = process.env.BEAM_PRETEND_VERSION || app.getVersion();
+        if (release.draft || release.prerelease || !isNewer(release.tag_name, current)) {
+            return;
+        }
+        const { response: button } = await dialog.showMessageBox(getWindow(), {
+            type: 'info',
+            title: APP_NAME,
+            message: APP_NAME + ' ' + String(release.tag_name).replace(/^v/, '') + ' is available',
+            detail: 'Current version: ' + current
+                + '
+
+Download the new .dmg from the Release page and drag ' + APP_NAME + ' into Applications again.',
+            buttons: ['Open download page', 'Later'],
+            defaultId: 0,
+            cancelId: 1,
+            noLink: true,
+        });
+        if (button === 0) {
+            shell.openExternal(release.html_url);
+        }
+    } catch (e) {
+        // no internet: stay silent, the app works normally
+        console.error('update check failed: ' + (e && e.message));
+    }
+}
 
 function configureLocalTest() {
     const url = process.env.BEAM_UPDATE_URL;
@@ -31,6 +68,12 @@ function configureLocalTest() {
 }
 
 function initAutoUpdate(getWindow) {
+    if (process.platform === 'darwin') {
+        if (app.isPackaged || process.env.BEAM_PRETEND_VERSION) {
+            setTimeout(() => notifyMacUpdate(getWindow), CHECK_DELAY_MS);
+        }
+        return;
+    }
     if (!app.isPackaged && !configureLocalTest()) {
         return;
     }

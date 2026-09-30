@@ -1,0 +1,90 @@
+# On a version tag (v2.0.2...): build the Windows installer and the Mac .dmg files,
+# then publish them together in one GitHub Release (notes from .github/release-notes/<tag>.md).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)build, e.g. v2.0.2'
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            tools: windows
+            files: |
+              web-desktop/dist/installer/Beam-*-Windows-Setup.exe
+              web-desktop/dist/installer/Beam-*-Windows-Setup.exe.blockmap
+              web-desktop/dist/installer/latest.yml
+          - os: macos-latest
+            tools: darwin
+            files: |
+              web-desktop/dist/installer/Beam-*-macOS-*.dmg
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: web-desktop
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web-desktop/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Download adb (Android SDK platform-tools)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/pt.zip" "https://dl.google.com/android/repository/platform-tools-latest-${{ matrix.tools }}.zip"
+          unzip -q "$RUNNER_TEMP/pt.zip" -d "$RUNNER_TEMP"
+          echo "PLATFORM_TOOLS_DIR=$RUNNER_TEMP/platform-tools" >> "$GITHUB_ENV"
+      - run: node scripts/build-installer.js
+      - run: ls -la dist/installer
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.tools }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la out
+          notes=".github/release-notes/$TAG.md"
+          [ -f "$notes" ] || echo "Beam $TAG" > "$notes"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --title "Beam ${TAG#v}" --notes-file "$notes"
+            gh release upload "$TAG" out/* --clobber
+          else
+            gh release create "$TAG" out/* --title "Beam ${TAG#v}" --notes-file "$notes" --latest
+          fi

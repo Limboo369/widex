@@ -1,4 +1,5 @@
-// Generates the application icon (app/icon.png and a multi-size app/icon.ico) from public/img/icon.svg.
+// Generates the application icon (app/icon.png, a multi-size app/icon.ico and the 1024 px macOS icon app/icon-mac.png)
+// from public/img/icon.svg.
 // Runs headless in Electron (no window):  npx electron scripts/make-icon.js
 'use strict';
 
@@ -16,10 +17,10 @@ app.disableHardwareAcceleration();
 app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'beam-icon-')));
 
 const page = `<canvas id=c></canvas><script>
-window.render = async (text, size) => {
+window.render = async (text, size, inset = 0) => {
   const i = new Image(); i.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(text))); await i.decode();
   const c = document.getElementById('c'); c.width = c.height = size; const x = c.getContext('2d');
-  x.clearRect(0, 0, size, size); x.drawImage(i, 0, 0, size, size); return c.toDataURL('image/png');
+  x.clearRect(0, 0, size, size); x.drawImage(i, inset, inset, size - 2 * inset, size - 2 * inset); return c.toDataURL('image/png');
 };
 </script>`;
 
@@ -54,6 +55,9 @@ app.whenReady().then(async () => {
     }
     fs.writeFileSync(path.join(ROOT, 'app', 'icon.png'), pngs[pngs.length - 1].data);
     fs.writeFileSync(path.join(ROOT, 'app', 'icon.ico'), encodeIco(pngs));
-    console.log('app/icon.png and app/icon.ico (' + SIZES.join(', ') + ' px) written');
+    // macOS: 1024 px, the artwork about 824 px wide like the other Dock icons (electron-builder turns it into .icns)
+    const mac = await win.webContents.executeJavaScript(`render(${JSON.stringify(svg)}, 1024, 40)`);
+    fs.writeFileSync(path.join(ROOT, 'app', 'icon-mac.png'), Buffer.from(mac.split(',')[1], 'base64'));
+    console.log('app/icon.png, app/icon.ico (' + SIZES.join(', ') + ' px) and app/icon-mac.png written');
     app.exit(0);
 });

@@ -1,14 +1,14 @@
 'use strict';
 
 /**
- * Beam as a Windows application (Electron): same web desktop, without the browser around it.
+ * Beam as a desktop application for Windows and macOS (Electron): same web desktop, without the browser around it.
  * Advantages for games: browser shortcuts (Ctrl+W, Ctrl+R, Alt...) do not interfere, one window, starts the server itself.
  */
 
 const path = require('path');
 const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
 
-// the data (profiles, settings) is shared with the browser version (%APPDATA%\Beam)
+// the data (profiles, settings) is shared with the browser version (%APPDATA%\Beam, ~/.config/beam on macOS)
 const { startServer, findRunningServer } = require('../server');
 const { initAutoUpdate } = require('./updater');
 const { APP_NAME, DATA_DIR_NAME } = require('../lib/brand');
@@ -56,7 +56,12 @@ async function createWindow() {
         baseUrl = 'http://127.0.0.1:' + server.port;
     }
 
-    Menu.setApplicationMenu(null);
+    if (process.platform === 'darwin') {
+        // macOS always shows a menu bar: keep the standard one (Cmd+Q, Cmd+H, copy and paste)
+        Menu.setApplicationMenu(Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'windowMenu' }]));
+    } else {
+        Menu.setApplicationMenu(null);
+    }
     mainWindow = new BrowserWindow({
         width: 1600,
         height: 940,
@@ -98,8 +103,8 @@ async function createWindow() {
         }
     });
     mainWindow.webContents.on('before-input-event', (event, input) => {
-        // developer tools (for diagnostics)
-        if (input.type === 'keyDown' && input.control && input.shift && input.key.toLowerCase() === 'i') {
+        // developer tools (for diagnostics): Ctrl+Shift+I, Cmd+Shift+I on macOS
+        if (input.type === 'keyDown' && (input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i') {
             mainWindow.webContents.toggleDevTools();
         }
     });
